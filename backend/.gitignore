@@ -1,0 +1,16 @@
+# Environment secrets — NEVER commit this
+.env
+
+# SQLite database file
+*.db
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# Logs
+logs/
+*.log

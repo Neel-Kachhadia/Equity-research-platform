@@ -1,0 +1,417 @@
+@import "tailwindcss";
+
+/* ═══════════════════════════════════════════════════════════
+   EREBUS Design System — Tailwind v4 @theme
+═══════════════════════════════════════════════════════════ */
+@theme {
+  /* Surfaces — warmer navy-dark (less pure black) */
+  --color-erebus-bg:        #0C1018;
+  --color-erebus-surface:   #131720;
+  --color-erebus-surface-2: #191F2C;
+  --color-erebus-surface-3: #1E2535;
+
+  /* Brand */
+  --color-erebus-gold:       #C9A84C;
+  --color-erebus-gold-light: #DFC06A;
+
+  /* Data accents */
+  --color-erebus-blue:   #4A8FE7;
+  --color-erebus-green:  #2ECC8A;
+  --color-erebus-red:    #D95555;
+  --color-erebus-amber:  #E09A25;
+
+  /* Text */
+  --color-erebus-text-1: #EEE9E0;
+  --color-erebus-text-2: #8A8D9A;
+  --color-erebus-text-3: #4E5262;
+
+  /* Font stacks */
+  --font-sans:      'Inter', system-ui, sans-serif;
+  --font-serif:     'DM Serif Display', Georgia, serif;
+  --font-mono:      'JetBrains Mono', 'Courier New', monospace;
+  --font-dm-serif:  'DM Serif Display', Georgia, serif;
+  --font-jetbrains: 'JetBrains Mono', 'Courier New', monospace;
+
+  /* Animations */
+  --animate-fade-up:        fade-up 0.55s cubic-bezier(0.16,1,0.3,1) forwards;
+  --animate-fade-in:        fade-in 0.4s ease forwards;
+  --animate-pulse-dot:      pulse-dot 2s cubic-bezier(0.4,0,0.6,1) infinite;
+  --animate-shimmer:        shimmer 2s linear infinite;
+  --animate-spin:           spin 1s linear infinite;
+  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16,1,0.3,1) forwards;
+  --animate-bounce-down:    bounce-down 1.5s ease-in-out infinite;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   :root — RGBA composites & CSS vars for GSAP / inline styles
+═══════════════════════════════════════════════════════════ */
+:root {
+  --erebus-void:           #0C1018;
+  --erebus-surface:        #131720;
+  --erebus-depth:          #0E1219;
+  --erebus-cream:          #EEE9E0;
+  --erebus-secondary:      #8A8D9A;
+  --erebus-muted:          #4E5262;
+  --erebus-gold:           #C9A84C;
+  --erebus-gold-light:     #DFC06A;
+  --erebus-green:          #2ECC8A;
+  --erebus-red:            #D95555;
+  --erebus-amber:          #E09A25;
+  --erebus-blue:           #4A8FE7;
+
+  --border:                rgba(255,255,255,0.08);
+  --erebus-border-subtle:  rgba(255,255,255,0.08);
+  --erebus-border-hover:   rgba(255,255,255,0.14);
+  --erebus-border-gold:    rgba(201,168,76,0.18);
+  --erebus-glow-gold:      rgba(201,168,76,0.09);
+  --gold-dim:              rgba(201,168,76,0.10);
+  --gold-glow:             rgba(201,168,76,0.06);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Keyframes
+═══════════════════════════════════════════════════════════ */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.2; }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(100%); opacity: 0; }
+  to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes bounce-down {
+  0%, 100% { transform: translateY(0); opacity: 0.7; }
+  50%       { transform: translateY(10px); opacity: 0.3; }
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes erebus-reveal-char {
+  0%   { opacity: 0; transform: translateY(110%) rotateX(-70deg); }
+  100% { opacity: 1; transform: translateY(0)    rotateX(0); }
+}
+
+/* ── Orb drift animations (for GlobalBackground) ─────────────── */
+@keyframes orb-drift-1 {
+  0%,  100% { transform: translateX(-50%) translate(0px,   0px); }
+  20%        { transform: translateX(-50%) translate(70px, -50px); }
+  45%        { transform: translateX(-50%) translate(-50px, 80px); }
+  70%        { transform: translateX(-50%) translate(90px,  30px); }
+}
+@keyframes orb-drift-2 {
+  0%,  100% { transform: translate(0px,    0px); }
+  30%        { transform: translate(-120px, -70px); }
+  60%        { transform: translate(60px,   90px); }
+}
+@keyframes orb-drift-3 {
+  0%,  100% { transform: translate(0px,   0px); }
+  40%        { transform: translate(100px,-80px); }
+  75%        { transform: translate(-60px, 60px); }
+}
+@keyframes orb-drift-4 {
+  0%,  100% { transform: translate(0px,  0px); }
+  35%        { transform: translate(80px,-50px); }
+  65%        { transform: translate(-70px, 70px); }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   Base Reset
+═══════════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background-color: #0C1018;
+  color: #EEE9E0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a { text-decoration: none; color: inherit; }
+::selection { background: rgba(201,168,76,0.22); color: #EEE9E0; }
+
+::-webkit-scrollbar       { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.09); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
+
+/* ═══════════════════════════════════════════════════════════
+   @layer components
+═══════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* ── Scrollbar ────────────────────────────────────────── */
+  .scrollbar-none { scrollbar-width: none; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+
+  /* ── Text effects ─────────────────────────────────────── */
+  .word-anim { animation: fade-up 0.55s cubic-bezier(0.16,1,0.3,1) forwards; opacity: 0; }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg,#C9A84C 0%,#DFC06A 50%,#C9A84C 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .text-shimmer {
+    background: linear-gradient(90deg,#8A8D9A 0%,#EEE9E0 40%,#C9A84C 50%,#EEE9E0 60%,#8A8D9A 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s linear infinite;
+  }
+
+  /* ── GSAP character animation ─────────────────────────── */
+  .erebus-char { display: inline-block; }
+
+  /* ── Section layout ───────────────────────────────────── */
+  .erebus-section {
+    position: relative;
+    padding: clamp(4rem, 6vw, 8rem) clamp(1.5rem, 4vw, 5rem);
+    /* Semi-transparent so GlobalBackground orbs bleed through */
+    isolation: isolate;
+  }
+
+  .erebus-3-column {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+  }
+
+  /* ── Horizontal carousel ──────────────────────────────── */
+  .erebus-carousel {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    gap: 1.5rem;
+    padding-bottom: 0.5rem;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(201,168,76,0.2) transparent;
+  }
+  .erebus-carousel::-webkit-scrollbar { height: 3px; }
+  .erebus-carousel::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.25); border-radius: 2px; }
+
+  /* ── Glass ────────────────────────────────────────────── */
+  .glass {
+    background: rgba(19,23,32,0.70);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  /* ── Elevated card ────────────────────────────────────── */
+  .elevated {
+    background-color: #131720;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.35), 0 4px 16px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  /* ── EREBUS semantic cards ────────────────────────────── */
+  .erebus-card {
+    background: rgba(19,23,32,0.6);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 1.5rem;
+    transition: border-color 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+    backdrop-filter: blur(8px);
+  }
+  .erebus-card:hover {
+    border-color: rgba(201,168,76,0.22);
+    background: rgba(19,23,32,0.75);
+    box-shadow: inset 0 0 24px rgba(201,168,76,0.06);
+  }
+  .erebus-card-featured {
+    border: 1px solid rgba(201,168,76,0.35);
+    background: rgba(201,168,76,0.04);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 50px rgba(201,168,76,0.09), inset 0 0 30px rgba(201,168,76,0.06);
+  }
+
+  /* ── Gold border variants ─────────────────────────────── */
+  .gold-top-border  { border-top: 2px solid #C9A84C; }
+  .gold-left-border { border-left: 3px solid #C9A84C; }
+  .gold-border      { border: 1px solid rgba(201,168,76,0.18); }
+  .gold-glow        { box-shadow: inset 0 0 30px rgba(201,168,76,0.09); }
+  .gold-aura        { box-shadow: 0 0 50px rgba(201,168,76,0.14); }
+
+  /* ── Card hover lift ──────────────────────────────────── */
+  .card-interactive {
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
+  }
+  .card-interactive:hover {
+    border-color: rgba(201,168,76,0.25) !important;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+
+  /* ── Buttons ──────────────────────────────────────────── */
+  .btn-gold {
+    background-color: #C9A84C;
+    color: #0C1018;
+    font-weight: 600;
+    transition: background-color 0.15s, transform 0.1s, box-shadow 0.15s;
+  }
+  .btn-gold:hover {
+    background-color: #DFC06A;
+    box-shadow: 0 4px 24px rgba(201,168,76,0.35);
+  }
+  .btn-gold:active { transform: scale(0.98); }
+
+  .btn-ghost {
+    background-color: transparent;
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #EEE9E0;
+    transition: border-color 0.15s, color 0.15s, background-color 0.15s;
+  }
+  .btn-ghost:hover {
+    border-color: rgba(201,168,76,0.4);
+    color: #C9A84C;
+    background-color: rgba(201,168,76,0.06);
+  }
+
+  .cta-button-primary {
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    background: #C9A84C;
+    color: #0C1018;
+    border: none;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    box-shadow: 0 8px 28px rgba(201,168,76,0.25);
+  }
+  .cta-button-primary:hover {
+    background: #DFC06A;
+    box-shadow: 0 14px 40px rgba(201,168,76,0.4);
+    transform: translateY(-1px);
+  }
+
+  .cta-button-secondary {
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 500;
+    background: rgba(255,255,255,0.04);
+    color: #C9A84C;
+    border: 1px solid rgba(201,168,76,0.35);
+    cursor: pointer;
+    backdrop-filter: blur(4px);
+    transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  }
+  .cta-button-secondary:hover {
+    border-color: #C9A84C;
+    background: rgba(201,168,76,0.06);
+    box-shadow: inset 0 0 24px rgba(201,168,76,0.09);
+  }
+
+  /* ── Input ────────────────────────────────────────────── */
+  .input-erebus { outline: none; transition: border-color 0.15s, box-shadow 0.15s; }
+  .input-erebus::placeholder { color: #4E5262; }
+  .input-erebus:focus { border-color: #C9A84C !important; box-shadow: 0 0 0 3px rgba(201,168,76,0.12); }
+
+  /* ── Score bar ────────────────────────────────────────── */
+  .bar-fill { transition: width 1.2s cubic-bezier(0.16,1,0.3,1); }
+
+  /* ── Chips ────────────────────────────────────────────── */
+  .chip-gold  { background:rgba(201,168,76,0.12); border:1px solid rgba(201,168,76,0.28); color:#C9A84C; }
+  .chip-blue  { background:rgba(74,143,231,0.12); border:1px solid rgba(74,143,231,0.25); color:#4A8FE7; }
+  .chip-green { background:rgba(46,204,138,0.12); border:1px solid rgba(46,204,138,0.25); color:#2ECC8A; }
+  .chip-red   { background:rgba(217,85,85,0.12);  border:1px solid rgba(217,85,85,0.25);  color:#D95555; }
+  .chip-amber { background:rgba(224,154,37,0.12); border:1px solid rgba(224,154,37,0.25); color:#E09A25; }
+
+  /* ── Typography helpers ───────────────────────────────── */
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #C9A84C;
+  }
+  .erebus-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #8A8D9A;
+    margin-bottom: 0.5rem;
+  }
+  .ticker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+  }
+  .mono-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #C9A84C;
+  }
+
+  /* ── AI pulsing dots ──────────────────────────────────── */
+  .erebus-pulse-dot {
+    display: inline-block;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: #C9A84C;
+    margin: 0 2px;
+    animation: pulse-dot 1.5s cubic-bezier(0.4,0,0.6,1) infinite;
+  }
+  .erebus-pulse-dot:nth-child(2) { animation-delay: 0.2s; }
+  .erebus-pulse-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* ── Scroll chevron ───────────────────────────────────── */
+  .erebus-chevron { animation: bounce-down 1.5s ease-in-out infinite; color: #C9A84C; }
+
+  /* ── Data colors ──────────────────────────────────────── */
+  .data-pos     { color: #2ECC8A; }
+  .data-neg     { color: #D95555; }
+  .data-neutral { color: #8A8D9A; }
+
+  /* ── Line clamp ───────────────────────────────────────── */
+  .line-clamp-2 { display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .line-clamp-3 { display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+  /* ── Sidebar active ───────────────────────────────────── */
+  .nav-item-active {
+    color: #C9A84C !important;
+    background-color: rgba(201,168,76,0.10) !important;
+    border-left: 2px solid #C9A84C;
+  }
+
+  /* ── Separator ────────────────────────────────────────── */
+  .separator { height: 1px; background: rgba(255,255,255,0.08); }
+
+} /* end @layer components */
+
+/* ── Reduced motion ─────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

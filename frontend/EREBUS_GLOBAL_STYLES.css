@@ -1,0 +1,510 @@
+/* erebus.css — EREBUS Global Styles & Animations */
+
+/* ────────────────────────────────────────────────────────── */
+/* Font Imports */
+/* ────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ────────────────────────────────────────────────────────── */
+/* Color Variables */
+/* ────────────────────────────────────────────────────────── */
+
+:root {
+  --erebus-void: #0d0f14;
+  --erebus-surface: #13161e;
+  --erebus-depth: #1a1d26;
+  --erebus-cream: #f0ede6;
+  --erebus-secondary: #8b8e99;
+  --erebus-muted: #545769;
+  --erebus-gold: #c9a84c;
+  --erebus-gold-light: #d4b560;
+  --erebus-green: #3ecf8e;
+  --erebus-red: #e55c5c;
+  --erebus-amber: #f0a429;
+  --erebus-blue: #4a8fe7;
+
+  --erebus-border-subtle: rgba(255, 255, 255, 0.07);
+  --erebus-border-gold: rgba(201, 168, 76, 0.15);
+  --erebus-glow-gold: rgba(201, 168, 76, 0.08);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Base Typography */
+/* ────────────────────────────────────────────────────────── */
+
+body {
+  background: var(--erebus-void);
+  color: var(--erebus-cream);
+  font-family: 'Inter', sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+h1, h2, h3 {
+  font-family: 'DM Serif Display', serif;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+}
+
+h2 {
+  font-size: clamp(1.75rem, 5vw, 3.5rem);
+}
+
+h3 {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+
+/* Monospace for tickers, scores, labels */
+.mono,
+.terminal-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  font-weight: 500;
+}
+
+.mono-score {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(1.5rem, 4vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--erebus-gold);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Glassmorphism Base */
+/* ────────────────────────────────────────────────────────── */
+
+.glass {
+  background: rgba(19, 22, 30, 0.4);
+  border: 1px solid var(--erebus-border-subtle);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.glass-deep {
+  background: rgba(13, 15, 20, 0.6);
+  border: 1px solid var(--erebus-border-subtle);
+  backdrop-filter: blur(15px);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Gold Accents & Effects */
+/* ────────────────────────────────────────────────────────── */
+
+.gold-top-border {
+  border-top: 2px solid var(--erebus-gold);
+}
+
+.gold-left-border {
+  border-left: 3px solid var(--erebus-gold);
+}
+
+.gold-border {
+  border: 1px solid var(--erebus-border-gold);
+}
+
+.gold-glow {
+  box-shadow: inset 0 0 30px var(--erebus-glow-gold);
+}
+
+.gold-aura {
+  box-shadow: 0 0 40px rgba(201, 168, 76, 0.15);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Section Base */
+/* ────────────────────────────────────────────────────────── */
+
+.erebus-section {
+  position: relative;
+  padding: clamp(2rem, 4vw, 8rem) 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .erebus-section {
+    padding: clamp(2rem, 4vw, 8rem) 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .erebus-section {
+    padding: clamp(4rem, 6vw, 8rem) 3rem;
+  }
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Dividers & Separators */
+/* ────────────────────────────────────────────────────────── */
+
+.erebus-divider {
+  border-bottom: 1px solid var(--erebus-border-subtle);
+  margin: 2rem 0;
+}
+
+.erebus-divider-gold {
+  border-bottom: 1px solid var(--erebus-border-gold);
+  margin: 2rem 0;
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Buttons & CTAs */
+/* ────────────────────────────────────────────────────────── */
+
+.cta-button {
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  font-family: 'Inter', sans-serif;
+  font-weight: 500;
+  font-size: 1rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease-out;
+}
+
+.cta-button-primary {
+  background: var(--erebus-gold);
+  color: var(--erebus-void);
+  box-shadow: 0 8px 24px rgba(201, 168, 76, 0.2);
+}
+
+.cta-button-primary:hover {
+  background: var(--erebus-gold-light);
+  box-shadow: 0 12px 36px rgba(201, 168, 76, 0.35);
+  transform: translateY(-2px);
+}
+
+.cta-button-secondary {
+  background: transparent;
+  color: var(--erebus-gold);
+  border: 1px solid rgba(201, 168, 76, 0.4);
+}
+
+.cta-button-secondary:hover {
+  border-color: var(--erebus-gold);
+  background: rgba(201, 168, 76, 0.05);
+  box-shadow: inset 0 0 24px rgba(201, 168, 76, 0.1);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Animations & Keyframes */
+/* ────────────────────────────────────────────────────────── */
+
+/* Staggered character reveal (hero) */
+@keyframes erebus-reveal-char {
+  0% {
+    opacity: 0;
+    transform: translateY(110%) rotateX(-70deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateX(0);
+  }
+}
+
+.erebus-char {
+  display: inline-block;
+}
+
+/* Typewriter effect for demo */
+@keyframes erebus-typewriter {
+  0% {
+    max-width: 0;
+  }
+  100% {
+    max-width: 100%;
+  }
+}
+
+.erebus-typewriter {
+  animation: erebus-typewriter 0.1s linear forwards;
+  overflow: hidden;
+}
+
+/* Pulsing dots for AI thinking */
+@keyframes erebus-pulse-dot {
+  0%, 100% {
+    opacity: 0.4;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.erebus-pulse-dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--erebus-gold);
+  margin: 0 2px;
+  animation: erebus-pulse-dot 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.erebus-pulse-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.erebus-pulse-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+/* Fade + slide up (section entrance) */
+@keyframes erebus-fade-up {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.erebus-fade-up {
+  animation: erebus-fade-up 0.8s ease-out forwards;
+}
+
+/* Gold border grow (hover effect on cards) */
+@keyframes erebus-border-grow {
+  0% {
+    width: 0;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+.erebus-hover-gold-border:hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--erebus-gold);
+  animation: erebus-border-grow 0.6s ease-out forwards;
+}
+
+/* Scale pulse (for featured items) */
+@keyframes erebus-scale-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.02);
+    opacity: 0.9;
+  }
+}
+
+.erebus-scale-pulse {
+  animation: erebus-scale-pulse 3s ease-in-out infinite;
+}
+
+/* Chevron bounce (scroll indicator) */
+@keyframes erebus-bounce-down {
+  0%, 100% {
+    transform: translateY(0);
+    opacity: 0.6;
+  }
+  50% {
+    transform: translateY(12px);
+    opacity: 0.3;
+  }
+}
+
+.erebus-chevron {
+  animation: erebus-bounce-down 1.5s ease-in-out infinite;
+  color: var(--erebus-gold);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Cards & Panels */
+/* ────────────────────────────────────────────────────────── */
+
+.erebus-card {
+  background: rgba(19, 22, 30, 0.5);
+  border: 1px solid var(--erebus-border-subtle);
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease-out;
+}
+
+.erebus-card:hover {
+  border-color: var(--erebus-border-gold);
+  background: rgba(19, 22, 30, 0.7);
+  box-shadow: inset 0 0 24px rgba(201, 168, 76, 0.08);
+}
+
+.erebus-card-featured {
+  border: 1px solid var(--erebus-border-gold);
+  background: rgba(201, 168, 76, 0.04);
+  box-shadow: inset 0 0 30px rgba(201, 168, 76, 0.08);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Grid & Layout */
+/* ────────────────────────────────────────────────────────── */
+
+.erebus-3-column {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+}
+
+@media (max-width: 768px) {
+  .erebus-3-column {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Scrolling Elements */
+/* ────────────────────────────────────────────────────────── */
+
+/* Horizontal scroll carousel */
+.erebus-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  gap: 2rem;
+  padding: 1rem 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--erebus-border-gold) transparent;
+}
+
+.erebus-carousel::-webkit-scrollbar {
+  height: 6px;
+}
+
+.erebus-carousel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.erebus-carousel::-webkit-scrollbar-thumb {
+  background: var(--erebus-border-gold);
+  border-radius: 3px;
+}
+
+.erebus-carousel::-webkit-scrollbar-thumb:hover {
+  background: var(--erebus-gold);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Labels & Tags */
+/* ────────────────────────────────────────────────────────── */
+
+.erebus-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--erebus-secondary);
+  margin-bottom: 0.5rem;
+}
+
+.erebus-tag {
+  display: inline-block;
+  background: rgba(201, 168, 76, 0.1);
+  border: 1px solid rgba(201, 168, 76, 0.2);
+  color: var(--erebus-gold);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0.3rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  margin: 0.25rem;
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Utility Classes */
+/* ────────────────────────────────────────────────────────── */
+
+.erebus-accent {
+  color: var(--erebus-gold);
+}
+
+.erebus-positive {
+  color: var(--erebus-green);
+}
+
+.erebus-negative {
+  color: var(--erebus-red);
+}
+
+.erebus-warning {
+  color: var(--erebus-amber);
+}
+
+.erebus-link {
+  color: var(--erebus-blue);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(74, 143, 231, 0.4);
+  transition: all 0.2s ease;
+}
+
+.erebus-link:hover {
+  color: var(--erebus-gold);
+  border-bottom-color: var(--erebus-gold);
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Responsive Typography */
+/* ────────────────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+  }
+
+  h3 {
+    font-size: 1.125rem;
+  }
+
+  .mono-score {
+    font-size: 1.75rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  h1 {
+    font-size: 5rem;
+  }
+
+  h2 {
+    font-size: 3.5rem;
+  }
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Accessibility */
+/* ────────────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ────────────────────────────────────────────────────────── */
+/* Print Styles */
+/* ────────────────────────────────────────────────────────── */
+
+@media print {
+  .erebus-section {
+    page-break-inside: avoid;
+  }
+}

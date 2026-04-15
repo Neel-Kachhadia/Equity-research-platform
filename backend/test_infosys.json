@@ -1,0 +1,276 @@
+{
+  "mode": "normal",
+  "company_id": "INFOSYS",
+  "data": {
+    "ranking": {
+      "rank": null,
+      "cas": -0.12,
+      "dci": 87.8,
+      "qsd": -1.34,
+      "risk_score": 33.0,
+      "sector": "Diversified",
+      "signal_card": {
+        "signals": {
+          "growth": 0.36,
+          "margin": -0.06,
+          "consistency": -2.1,
+          "risk": 0.11,
+          "volatility": -0.33,
+          "credibility": 0.95,
+          "sentiment": 1.05,
+          "rel_strength": 0.0
+        },
+        "raw": {
+          "growth": 0.071872,
+          "margin": -0.01126,
+          "consistency": -0.419845,
+          "risk": 0.022981,
+          "volatility": -0.065866,
+          "credibility": 0.19,
+          "sentiment": 0.21,
+          "rel_strength": 0.0
+        }
+      },
+      "note": "Live score \u2014 single company, no universe ranking"
+    },
+    "quant": {
+      "ratios": {
+        "gross_margin": 0.06524326645806491,
+        "operating_margin": 0.06524326645806491,
+        "net_margin": 0.16389349039818393,
+        "return_on_equity": 0.2,
+        "return_on_assets": null,
+        "current_ratio": null,
+        "quick_ratio": null,
+        "debt_to_equity": 0.0,
+        "interest_coverage": null,
+        "revenue_growth": 0.06064944361293681,
+        "earnings_growth": null
+      },
+      "trends": null,
+      "volatility": null,
+      "risk": {
+        "overall_risk_score": 33.0,
+        "risk_category": "medium",
+        "financial_risk": {
+          "score": 33,
+          "factors": [
+            "Low leverage (D/E: 0.00)",
+            "Strong profitability: 16.4%"
+          ],
+          "assessment": "medium"
+        },
+        "market_risk": {
+          "score": null,
+          "factors": [],
+          "assessment": "insufficient_data"
+        },
+        "volatility_risk": {
+          "score": null,
+          "factors": [],
+          "assessment": "insufficient_data"
+        },
+        "risk_factors": [
+          "Low leverage (D/E: 0.00)",
+          "Strong profitability: 16.4%"
+        ],
+        "warnings": []
+      }
+    },
+    "alpha": {
+      "company_id": "Infosys",
+      "company_name": "Infosys",
+      "sector": "Diversified",
+      "raw_alphas": {
+        "growth": 0.071872,
+        "margin": -0.01126,
+        "consistency": -0.419845,
+        "risk": 0.022981,
+        "volatility": -0.065866,
+        "credibility": 0.19,
+        "sentiment": 0.21,
+        "rel_strength": 0.0
+      },
+      "normalised_alphas": {
+        "growth": 0.36,
+        "margin": -0.06,
+        "consistency": -2.1,
+        "risk": 0.11,
+        "volatility": -0.33,
+        "credibility": 0.95,
+        "sentiment": 1.05,
+        "rel_strength": 0.0
+      },
+      "data_flags": {
+        "growth": [
+          "sector_median_imputed_zero: no peer data provided"
+        ],
+        "margin": [],
+        "consistency": [],
+        "risk": [],
+        "volatility": [],
+        "credibility": [
+          "guidance_accuracy_imputed_neutral: no guidance data",
+          "sentiment_trend_imputed_zero: need \u22652 sentiment periods",
+          "hedge_ratio_imputed_moderate: no transcript provided"
+        ],
+        "sentiment": [
+          "pos_ratio_imputed_neutral: FinBERT output not provided",
+          "neg_ratio_imputed_neutral: FinBERT output not provided",
+          "delta_sentiment_imputed_zero: need \u22653 sentiment periods for 2yr delta"
+        ],
+        "rel_strength": []
+      },
+      "composite": {
+        "cas": -0.124,
+        "dci": 87.8,
+        "qsd": -1.34,
+        "confidence_band": "HIGH",
+        "divergence_type": "ALIGNED",
+        "divergence_flag": false,
+        "cas_label": "NEUTRAL",
+        "top_alpha": "sentiment",
+        "bottom_alpha": "consistency",
+        "_detail": {
+          "cas_result": {
+            "cas": -0.124,
+            "cas_raw": -0.124,
+            "weights": {
+              "growth": 0.2,
+              "margin": 0.2,
+              "consistency": 0.15,
+              "risk": 0.15,
+              "volatility": 0.1,
+              "credibility": 0.1,
+              "sentiment": 0.05,
+              "rel_strength": 0.05
+            },
+            "contributions": {
+              "growth": 0.072,
+              "margin": -0.012,
+              "consistency": -0.315,
+              "risk": 0.0165,
+              "volatility": -0.033,
+              "credibility": 0.095,
+              "sentiment": 0.052500000000000005,
+              "rel_strength": 0.0
+            },
+            "sector": "Diversified"
+          },
+          "dci_result": {
+            "dci": 0.8775597954564656,
+            "dci_pct": 87.8,
+            "confidence_band": "HIGH",
+            "data_coverage": 0.7,
+            "history_depth": 1.0,
+            "alpha_agreement": 0.9902391818258626
+          },
+          "qsd_result": {
+            "qsd": -1.34,
+            "cas_quant": -0.35,
+            "cas_sentiment": 0.99,
+            "divergence_flag": false,
+            "divergence_type": "ALIGNED",
+            "divergence_note": "Quantitative and sentiment signals are broadly consistent. High-conviction CAS output. No divergence adjustment applied."
+          },
+          "summary": {
+            "cas": -0.124,
+            "cas_label": "NEUTRAL",
+            "dci_pct": 87.8,
+            "confidence_band": "HIGH",
+            "qsd": -1.34,
+            "divergence_type": "ALIGNED",
+            "divergence_flag": false,
+            "top_alpha": "sentiment",
+            "bottom_alpha": "consistency"
+          }
+        }
+      },
+      "alpha_fields": {
+        "company_id": "Infosys",
+        "company_name": "Infosys",
+        "sector": "Diversified",
+        "revenue_series": [
+          70522.0,
+          82675.0,
+          90791.0,
+          100472.0,
+          121641.0,
+          146767.0,
+          153670.0,
+          162990.0
+        ],
+        "ebit_series": [
+          8784.0,
+          9437.0,
+          9809.0,
+          10115.0,
+          9874.0,
+          9943.0,
+          10535.0,
+          10634.0
+        ],
+        "npm_series": [
+          0.2273,
+          0.1863,
+          0.1828,
+          0.1926,
+          0.1818,
+          0.1642,
+          0.1707,
+          0.1639
+        ],
+        "ebit_margin_series": [
+          0.1246,
+          0.1141,
+          0.108,
+          0.1007,
+          0.0812,
+          0.0677,
+          0.0686,
+          0.0652
+        ],
+        "gross_margin_series": [
+          0.0612,
+          0.0632,
+          0.0652,
+          0.0672,
+          0.0692
+        ],
+        "debt_to_equity": 0.0,
+        "interest_coverage_ratio": 8.0,
+        "fcf_conversion": 1.2671,
+        "roe": 0.2,
+        "year_labels": [
+          "Trailing"
+        ],
+        "available_fields": 14,
+        "required_fields": 20,
+        "years_available": 8
+      }
+    },
+    "sentiment": {
+      "available": true,
+      "hedge_ratio": null,
+      "trajectory": null
+    }
+  },
+  "explanation": null,
+  "data_quality": {
+    "score": 0.7,
+    "has_price_data": false,
+    "has_financial_data": true,
+    "technical_signals_available": false,
+    "price_source": "none",
+    "price_points": 0,
+    "missing_fields": [],
+    "incomplete": false,
+    "warnings": [
+      "No price data \u2014 technical signals (RSI, MACD, momentum) unavailable"
+    ]
+  },
+  "warnings": [
+    "No price data \u2014 technical signals (RSI, MACD, momentum) unavailable"
+  ],
+  "confidence": 0.7
+}

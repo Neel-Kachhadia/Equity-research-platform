@@ -1,0 +1,3220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EREBUS — Equity Research Intelligence Platform | Architecture Specification v1.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --cream: #ede8de;
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --gold-dim: #8a6e2f;
+    --accent: #1a3a5c;
+    --accent-bright: #2563a8;
+    --signal-green: #1a6b3c;
+    --signal-red: #8b1a1a;
+    --signal-amber: #8b5a00;
+    --border: #c8bfa8;
+    --border-light: #ddd8cc;
+    --muted: #6b6456;
+    --rule: #b0a898;
+    --code-bg: #1a1a24;
+    --code-fg: #e8e0d0;
+    --code-accent: #c9a84c;
+    --code-comment: #6b7280;
+    --code-keyword: #7dd3fc;
+    --code-string: #86efac;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.75;
+    counter-reset: section;
+  }
+
+  /* ── COVER PAGE ── */
+  .cover {
+    min-height: 100vh;
+    background: var(--ink);
+    color: var(--paper);
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(201,168,76,0.06) 59px, rgba(201,168,76,0.06) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(201,168,76,0.06) 59px, rgba(201,168,76,0.06) 60px);
+    pointer-events: none;
+  }
+
+  .cover-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1000px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .cover-eyebrow::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .cover-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(56px, 8vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+    color: var(--paper);
+  }
+
+  .cover-subtitle-line {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(20px, 3vw, 32px);
+    color: var(--gold);
+    font-style: italic;
+    margin-bottom: 3rem;
+  }
+
+  .cover-desc {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(245,242,235,0.65);
+    max-width: 600px;
+    margin-bottom: 4rem;
+    font-weight: 300;
+  }
+
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: rgba(201,168,76,0.1);
+  }
+
+  .cover-meta-cell {
+    padding: 1rem 1.25rem;
+    background: rgba(10,10,15,0.6);
+  }
+
+  .cover-meta-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.25rem;
+  }
+
+  .cover-meta-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .cover-footer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid rgba(201,168,76,0.2);
+    padding-top: 2rem;
+    color: rgba(245,242,235,0.35);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .classification-badge {
+    background: var(--gold);
+    color: var(--ink);
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ── NAVIGATION ── */
+  .toc-page {
+    background: var(--cream);
+    padding: 6rem 4rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .toc-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3rem;
+  }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 960px;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-light);
+    text-decoration: none;
+    color: var(--ink);
+    transition: color 0.2s;
+  }
+  .toc-item:hover { color: var(--accent-bright); }
+
+  .toc-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold-dim);
+    min-width: 24px;
+    font-weight: 500;
+  }
+
+  .toc-name {
+    font-size: 13.5px;
+    font-weight: 400;
+    flex: 1;
+  }
+
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--border);
+    margin: 0 0.5rem;
+    position: relative;
+    top: -3px;
+  }
+
+  .toc-page-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 4rem;
+  }
+
+  /* ── SECTION HEADERS ── */
+  .section {
+    padding: 6rem 0 3rem;
+    border-top: 3px solid var(--ink);
+    margin-top: 5rem;
+  }
+
+  .section:first-of-type { margin-top: 0; }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 80px;
+    line-height: 1;
+    color: var(--border);
+    font-style: italic;
+    min-width: 80px;
+    letter-spacing: -0.05em;
+  }
+
+  .section-title-block {}
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .section-title em {
+    font-style: italic;
+    color: var(--gold-dim);
+  }
+
+  /* ── SUBSECTIONS ── */
+  h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin: 2.5rem 0 1rem;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  h4 {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 2rem 0 0.75rem;
+  }
+
+  h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gold-dim);
+    margin: 1.5rem 0 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: #1a1a24;
+    font-weight: 300;
+  }
+
+  strong { font-weight: 600; color: var(--ink); }
+
+  em { color: var(--muted); }
+
+  /* ── CALLOUTS ── */
+  .callout {
+    border-left: 3px solid var(--gold);
+    padding: 1.25rem 1.5rem;
+    background: rgba(201,168,76,0.06);
+    margin: 2rem 0;
+    position: relative;
+  }
+
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .callout p { color: var(--ink); font-size: 14px; margin: 0; }
+
+  .callout-insight {
+    border-left-color: var(--accent-bright);
+    background: rgba(37,99,168,0.05);
+  }
+  .callout-insight .callout-label { color: var(--accent-bright); }
+
+  .callout-warning {
+    border-left-color: var(--signal-red);
+    background: rgba(139,26,26,0.04);
+  }
+  .callout-warning .callout-label { color: var(--signal-red); }
+
+  /* ── CODE BLOCKS ── */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-fg);
+    padding: 1.5rem 1.75rem;
+    border-radius: 0;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    line-height: 1.7;
+    border-left: 2px solid var(--gold);
+    position: relative;
+  }
+
+  pre::before {
+    content: attr(data-label);
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    font-weight: 700;
+  }
+
+  .kw { color: var(--code-keyword); }
+  .str { color: var(--code-string); }
+  .cm { color: var(--code-comment); font-style: italic; }
+  .fn { color: #fbbf24; }
+  .num { color: #f9a8d4; }
+  .op { color: #c4b5fd; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: rgba(201,168,76,0.12);
+    color: var(--gold-dim);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* ── DIAGRAMS ── */
+  .diagram {
+    background: var(--ink);
+    color: #a0a8b8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    padding: 2rem 2.5rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+    border: 1px solid rgba(201,168,76,0.2);
+    position: relative;
+  }
+
+  .diagram::before {
+    content: attr(data-title);
+    display: block;
+    color: var(--gold);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .diag-gold { color: var(--gold); }
+  .diag-blue { color: #7dd3fc; }
+  .diag-green { color: #86efac; }
+  .diag-purple { color: #c4b5fd; }
+  .diag-red { color: #fca5a5; }
+  .diag-muted { color: #6b7280; }
+
+  /* ── EQUATIONS ── */
+  .equation {
+    background: var(--cream);
+    border: 1px solid var(--border);
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    overflow-x: auto;
+  }
+
+  .equation-label {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .eq { font-family: 'JetBrains Mono', monospace; color: var(--accent); }
+  .eq-sub { font-size: 10px; vertical-align: sub; }
+  .eq-sup { font-size: 10px; vertical-align: super; }
+
+  /* ── TABLES ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 13.5px;
+  }
+
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border-light);
+    color: #1a1a24;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: rgba(201,168,76,0.03); }
+  tr:hover td { background: rgba(201,168,76,0.07); }
+
+  /* ── GRID CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+  }
+
+  .card {
+    background: var(--paper);
+    padding: 1.5rem;
+  }
+
+  .card-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .card-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    margin-bottom: 0.5rem;
+    color: var(--ink);
+  }
+
+  .card-body {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* ── SPEC ROWS ── */
+  .spec-list { margin: 1rem 0; }
+
+  .spec-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-light);
+    align-items: baseline;
+  }
+
+  .spec-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gold-dim);
+    font-weight: 500;
+  }
+
+  .spec-val {
+    font-size: 13.5px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  /* ── PERSONA CARDS ── */
+  .persona {
+    border: 1px solid var(--border);
+    padding: 2rem;
+    margin: 1rem 0;
+    position: relative;
+  }
+
+  .persona::before {
+    content: attr(data-role);
+    position: absolute;
+    top: -1px;
+    left: 0;
+    background: var(--ink);
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 4px 12px;
+  }
+
+  .persona-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 0.25rem;
+    margin-top: 0.5rem;
+  }
+
+  .persona-desc {
+    font-size: 13.5px;
+    color: var(--muted);
+    margin-bottom: 1rem;
+    font-weight: 300;
+  }
+
+  .persona-needs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    font-size: 13px;
+  }
+
+  .need-section-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.5rem;
+  }
+
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin-bottom: 0.3rem; font-size: 13.5px; font-weight: 300; }
+
+  /* ── PIPELINE STEPS ── */
+  .pipeline {
+    margin: 1.5rem 0;
+    position: relative;
+  }
+
+  .pipeline-step {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 0;
+    position: relative;
+  }
+
+  .pipeline-step::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 44px;
+    bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .pipeline-step:last-child::before { display: none; }
+
+  .step-num {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    background: var(--ink);
+    color: var(--gold);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-content {
+    padding: 0.5rem 0 2.5rem;
+  }
+
+  .step-title {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+
+  .step-desc {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  /* ── COMPARISON ── */
+  .mode-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+  }
+
+  .mode-col {
+    background: var(--paper);
+    padding: 2rem;
+  }
+
+  .mode-col-header {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    margin-bottom: 0.25rem;
+  }
+
+  .mode-badge {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    margin-bottom: 1rem;
+  }
+
+  .badge-normal { background: rgba(26,107,60,0.12); color: var(--signal-green); }
+  .badge-deep { background: rgba(26,58,92,0.12); color: var(--accent); }
+
+  /* ── SIGNAL PILLS ── */
+  .pill {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-weight: 500;
+    margin: 2px;
+  }
+
+  .pill-green { background: rgba(26,107,60,0.15); color: var(--signal-green); }
+  .pill-red { background: rgba(139,26,26,0.15); color: var(--signal-red); }
+  .pill-amber { background: rgba(139,90,0,0.15); color: var(--signal-amber); }
+  .pill-blue { background: rgba(26,58,92,0.15); color: var(--accent); }
+  .pill-gold { background: rgba(201,168,76,0.15); color: var(--gold-dim); }
+
+  /* ── ENDPOINT BLOCKS ── */
+  .endpoint {
+    border: 1px solid var(--border);
+    margin: 1rem 0;
+    overflow: hidden;
+  }
+
+  .endpoint-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1rem;
+    background: var(--cream);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 8px;
+    letter-spacing: 0.05em;
+  }
+
+  .method-get { background: rgba(26,107,60,0.15); color: var(--signal-green); }
+  .method-post { background: rgba(26,58,92,0.15); color: var(--accent); }
+  .method-put { background: rgba(139,90,0,0.15); color: var(--signal-amber); }
+  .method-delete { background: rgba(139,26,26,0.15); color: var(--signal-red); }
+
+  .endpoint-path {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .endpoint-desc {
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    background: var(--ink);
+    color: rgba(245,242,235,0.3);
+    padding: 3rem 4rem;
+    margin-top: 6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border-light);
+    margin: 2rem 0;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin: 1.5rem 0;
+  }
+
+  .three-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 2rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 768px) {
+    .cover { padding: 2rem; }
+    .cover-meta-grid { grid-template-columns: 1fr 1fr; }
+    .content { padding: 0 1.5rem; }
+    .toc-page { padding: 3rem 1.5rem; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .section-header { flex-direction: column; gap: 0.5rem; }
+    .section-number { font-size: 40px; min-width: auto; }
+    .two-col, .three-col, .mode-compare, .persona-needs { grid-template-columns: 1fr; }
+    .spec-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- COVER PAGE -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-eyebrow">Architecture Design Specification · Internal Document · Confidential</div>
+
+    <div class="cover-title">EREBUS</div>
+    <div class="cover-subtitle-line">Equity Research & Business Universe System</div>
+
+    <p class="cover-desc">
+      A dual-mode, institutional-grade equity research intelligence platform combining real-time quantitative factor scoring, deep multi-modal document analysis, and explainable AI reasoning — purpose-built for fund managers, senior analysts, and research desks at tier-one investment institutions.
+    </p>
+
+    <div class="cover-meta-grid">
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Version</div>
+        <div class="cover-meta-value">1.0.0-ARCH</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Classification</div>
+        <div class="cover-meta-value">RESTRICTED</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Status</div>
+        <div class="cover-meta-value">DESIGN SPEC</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Date</div>
+        <div class="cover-meta-value">2025-Q2</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Universe</div>
+        <div class="cover-meta-value">NIFTY 50 / Custom</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Primary Mode</div>
+        <div class="cover-meta-value">Dual-Mode</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Section Count</div>
+        <div class="cover-meta-value">22 Sections</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Audience</div>
+        <div class="cover-meta-value">VVIP / Inst.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cover-footer">
+    <div>EREBUS Platform · Architecture Specification v1.0 · Property of [FIRM NAME REDACTED]</div>
+    <div><span class="classification-badge">Confidential</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- TABLE OF CONTENTS -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="toc-page">
+  <div class="toc-title">Table of Contents</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">01</span><span class="toc-name">System Overview</span><span class="toc-dots"></span><span class="toc-page-num">§1</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">02</span><span class="toc-name">Product Architecture</span><span class="toc-dots"></span><span class="toc-page-num">§2</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">03</span><span class="toc-name">High-Level System Architecture</span><span class="toc-dots"></span><span class="toc-page-num">§3</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">04</span><span class="toc-name">Mode Architecture</span><span class="toc-dots"></span><span class="toc-page-num">§4</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">05</span><span class="toc-name">Data Architecture</span><span class="toc-dots"></span><span class="toc-page-num">§5</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">06</span><span class="toc-name">File Ingestion Pipeline</span><span class="toc-dots"></span><span class="toc-page-num">§6</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">07</span><span class="toc-name">Document Intelligence Pipeline</span><span class="toc-dots"></span><span class="toc-page-num">§7</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">08</span><span class="toc-name">Feature Engineering System</span><span class="toc-dots"></span><span class="toc-page-num">§8</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">09</span><span class="toc-name">Quantitative Model Layer</span><span class="toc-dots"></span><span class="toc-page-num">§9</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">10</span><span class="toc-name">Machine Learning Layer</span><span class="toc-dots"></span><span class="toc-page-num">§10</span></a>
+    <a class="toc-item" href="#s11"><span class="toc-num">11</span><span class="toc-name">RAG System Design</span><span class="toc-dots"></span><span class="toc-page-num">§11</span></a>
+    <a class="toc-item" href="#s12"><span class="toc-num">12</span><span class="toc-name">Reasoning Engine</span><span class="toc-dots"></span><span class="toc-page-num">§12</span></a>
+    <a class="toc-item" href="#s13"><span class="toc-num">13</span><span class="toc-name">Explainability Layer</span><span class="toc-dots"></span><span class="toc-page-num">§13</span></a>
+    <a class="toc-item" href="#s14"><span class="toc-num">14</span><span class="toc-name">Visualization Engine</span><span class="toc-dots"></span><span class="toc-page-num">§14</span></a>
+    <a class="toc-item" href="#s15"><span class="toc-num">15</span><span class="toc-name">Export System</span><span class="toc-dots"></span><span class="toc-page-num">§15</span></a>
+    <a class="toc-item" href="#s16"><span class="toc-num">16</span><span class="toc-name">API Design</span><span class="toc-dots"></span><span class="toc-page-num">§16</span></a>
+    <a class="toc-item" href="#s17"><span class="toc-num">17</span><span class="toc-name">Frontend Architecture</span><span class="toc-dots"></span><span class="toc-page-num">§17</span></a>
+    <a class="toc-item" href="#s18"><span class="toc-num">18</span><span class="toc-name">Performance & Scalability</span><span class="toc-dots"></span><span class="toc-page-num">§18</span></a>
+    <a class="toc-item" href="#s19"><span class="toc-num">19</span><span class="toc-name">Reliability & Safety</span><span class="toc-dots"></span><span class="toc-page-num">§19</span></a>
+    <a class="toc-item" href="#s20"><span class="toc-num">20</span><span class="toc-name">Deployment Architecture</span><span class="toc-dots"></span><span class="toc-page-num">§20</span></a>
+    <a class="toc-item" href="#s21"><span class="toc-num">21</span><span class="toc-name">Demonstration Flow</span><span class="toc-dots"></span><span class="toc-page-num">§21</span></a>
+    <a class="toc-item" href="#s22"><span class="toc-num">22</span><span class="toc-name">Future Extensions</span><span class="toc-dots"></span><span class="toc-page-num">§22</span></a>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- CONTENT -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="content">
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 1: SYSTEM OVERVIEW -->
+<!-- ════════════════════════════════ -->
+<div id="s1" class="section">
+  <div class="section-header">
+    <div class="section-number">01</div>
+    <div class="section-title-block">
+      <div class="section-label">Section One</div>
+      <div class="section-title">System Overview &amp; <em>Design Philosophy</em></div>
+    </div>
+  </div>
+
+  <h3>1.1 Problem Framing in Institutional Context</h3>
+
+  <p>Modern institutional equity research operates under a profound information asymmetry problem. Analysts at tier-one firms process thousands of data points daily — quarterly filings, earnings transcripts, management commentaries, regulatory disclosures, macroeconomic releases, and continuous price signals — yet synthesis is largely manual, slow, and subject to cognitive bias. The average analyst covers 12–20 stocks with tools that are fundamentally fragmented: Bloomberg terminals for market data, internal models in Excel, PDFs opened in Acrobat, and email chains for collaborative annotation.</p>
+
+  <p>EREBUS is designed to resolve this fragmentation. It is not a data aggregator, and it is not a dashboard. It is an <strong>intelligence substrate</strong> — a unified reasoning layer that ingests multi-modal evidence, processes it through a rigorous quantitative and linguistic pipeline, and delivers analyst-grade outputs with full traceability. Every claim is grounded. Every score is explained. Every recommendation carries its reasoning chain.</p>
+
+  <div class="callout">
+    <div class="callout-label">Core Thesis</div>
+    <p>The competitive advantage of a tier-one research desk is not access to data — it is the quality, speed, and defensibility of synthesis. EREBUS operationalizes that synthesis into a reproducible, auditable, institutional-grade system.</p>
+  </div>
+
+  <h3>1.2 Design Philosophy</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">Principle 01</div>
+      <div class="card-title">Grounding Over Generation</div>
+      <div class="card-body">Every insight must be traceable to a source — a specific page, paragraph, earnings quarter, or data point. The system refuses to generate claims it cannot ground. Hallucination is treated as a critical failure mode, not an edge case.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Principle 02</div>
+      <div class="card-title">Explainability as First-Class Output</div>
+      <div class="card-body">Scores, rankings, and signals are not outputs — they are inputs to explanation. For every quantitative result, a human-readable reasoning trace is mandatory. SHAP values, feature contributions, and source evidence accompany every conclusion.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Principle 03</div>
+      <div class="card-title">Separation of Fast and Deep</div>
+      <div class="card-body">Normal Mode (sub-2-second responses for universe-wide signals) and Deep Research Mode (minutes-long, multi-document synthesis for single companies) are architected as distinct pipelines with different latency SLAs, compute profiles, and confidence thresholds.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Principle 04</div>
+      <div class="card-title">Institutional Reliability</div>
+      <div class="card-body">The system must behave predictably under adversarial conditions: missing data, contradictory filings, management obfuscation. Confidence intervals, data quality scores, and uncertainty flags are mandatory metadata on all outputs.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Principle 05</div>
+      <div class="card-title">Multi-Modal by Default</div>
+      <div class="card-body">Financial ratios, price series, document text, table data from filings, sentiment from earnings calls, and regulatory risk signals are fused at the feature layer — not bolted on post-hoc. The quant model and NLP model co-inform each other.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Principle 06</div>
+      <div class="card-title">Auditability and Compliance</div>
+      <div class="card-body">All outputs are versioned. Every model run is logged with its input data snapshot, model version, and timestamp. This supports regulatory audit trails and enables back-testing of research outputs against subsequent market outcomes.</div>
+    </div>
+  </div>
+
+  <h3>1.3 Key Constraints and Non-Negotiables</h3>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Latency SLA (Normal)</span><span class="spec-val">≤ 2 seconds for full NIFTY 50 scorecard refresh; ≤ 500ms for single-company signal retrieval from cache</span></div>
+    <div class="spec-row"><span class="spec-key">Latency SLA (Deep)</span><span class="spec-val">≤ 4 minutes for full deep research report on a single company with 5+ document sources</span></div>
+    <div class="spec-row"><span class="spec-key">Hallucination Rate</span><span class="spec-val">Target: 0%. Operationalized as: no claim in any output may lack a retrievable source citation. System must refuse rather than fabricate.</span></div>
+    <div class="spec-row"><span class="spec-key">Data Freshness</span><span class="spec-val">Market data: T+0 (intraday). Fundamental data: T+1 post-filing. Document index: within 30 minutes of upload.</span></div>
+    <div class="spec-row"><span class="spec-key">Availability</span><span class="spec-val">99.9% uptime during market hours (9:15 AM – 3:30 PM IST). 99.5% overall. RTO: 15 minutes. RPO: 0 (no data loss).</span></div>
+    <div class="spec-row"><span class="spec-key">Auditability</span><span class="spec-val">All model runs, input snapshots, and output artifacts must be retained for 7 years in immutable storage (regulatory requirement).</span></div>
+    <div class="spec-row"><span class="spec-key">Access Control</span><span class="spec-val">Role-based access control (RBAC). Analyst, Senior Analyst, Fund Manager, Admin tiers. Document-level access permissions.</span></div>
+    <div class="spec-row"><span class="spec-key">Universe</span><span class="spec-val">Default: NIFTY 50. Configurable to any BSE/NSE-listed universe. Deep Mode: any company globally with sufficient filing data.</span></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 2: PRODUCT ARCHITECTURE -->
+<!-- ════════════════════════════════ -->
+<div id="s2" class="section">
+  <div class="section-header">
+    <div class="section-number">02</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Two</div>
+      <div class="section-title">Product Architecture &amp; <em>User Flows</em></div>
+    </div>
+  </div>
+
+  <h3>2.1 User Personas</h3>
+
+  <div class="persona" data-role="Persona A · Primary User">
+    <div class="persona-name">The Senior Equity Analyst</div>
+    <div class="persona-desc">Covers 15–20 stocks, produces quarterly initiation reports, prepares briefing notes for fund managers, responds to management queries about specific positions. Deep domain expertise; wants the system to accelerate and validate, not replace, their judgment.</div>
+    <div class="persona-needs">
+      <div>
+        <div class="need-section-title">Core Jobs-to-Be-Done</div>
+        <ul>
+          <li>Rapidly identify which of their covered companies has had a material signal change</li>
+          <li>Synthesize earnings call language against prior-period guidance commitments</li>
+          <li>Generate draft initiation reports from uploaded annual reports + financial data</li>
+          <li>Validate their qualitative thesis against quantitative factor evidence</li>
+        </ul>
+      </div>
+      <div>
+        <div class="need-section-title">Primary Failure Modes to Avoid</div>
+        <ul>
+          <li>Being given confident outputs without sourcing (unverifiable claims)</li>
+          <li>Having to re-do formatting work the system should handle</li>
+          <li>Missing a key risk flagged in a regulatory filing</li>
+          <li>Factor scores that are unexplained black boxes</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="persona" data-role="Persona B · Power User">
+    <div class="persona-name">The Quantitative Portfolio Manager</div>
+    <div class="persona-desc">Manages a factor-based or multi-strategy portfolio. Needs universe-wide factor scores, cross-sectional comparisons, systematic signal generation, and exportable data for integration into their own portfolio optimization models.</div>
+    <div class="persona-needs">
+      <div>
+        <div class="need-section-title">Core Jobs-to-Be-Done</div>
+        <ul>
+          <li>Run full NIFTY 50 factor scorecard on demand</li>
+          <li>Export structured factor data to Excel or JSON for portfolio optimizer</li>
+          <li>Monitor regime changes (momentum shift, risk-off signals)</li>
+          <li>Compare peer groups on composite alpha scores</li>
+        </ul>
+      </div>
+      <div>
+        <div class="need-section-title">Primary Failure Modes to Avoid</div>
+        <ul>
+          <li>Stale data presented as current</li>
+          <li>Factor definitions that are inconsistently applied across companies</li>
+          <li>No API access for model integration</li>
+          <li>Cannot drill into what drives a specific ranking position</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="persona" data-role="Persona C · Executive User">
+    <div class="persona-name">The Chief Investment Officer / Research Head</div>
+    <div class="persona-desc">Needs high-level dashboards, exception alerts, and synthesis of team research. Reviews deep research reports before investment committee. Wants confidence that outputs are defensible and audit-ready.</div>
+    <div class="persona-needs">
+      <div>
+        <div class="need-section-title">Core Jobs-to-Be-Done</div>
+        <ul>
+          <li>Daily market intelligence brief: top movers, risk alerts, signal changes</li>
+          <li>Pre-IC review of analyst reports with evidence grounding visible</li>
+          <li>Cross-portfolio risk concentration analysis</li>
+          <li>Management credibility scoring for key investee companies</li>
+        </ul>
+      </div>
+      <div>
+        <div class="need-section-title">Primary Failure Modes to Avoid</div>
+        <ul>
+          <li>System produces outputs that can't be defended in IC meeting</li>
+          <li>No visibility into confidence levels or data quality</li>
+          <li>Can't generate a polished PDF report on short notice</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <h3>2.2 User Flows</h3>
+
+  <h4>Normal Mode Flow — Market Intelligence Snapshot</h4>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Dashboard Landing — Universe Overview</div>
+        <div class="step-desc">User arrives at the EREBUS dashboard. The system has pre-computed factor scores for the full NIFTY 50 universe (refreshed on schedule or on-demand). They see: composite score ranking, momentum heatmap, sector distribution, top signals.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Filter & Sort — Signal Discovery</div>
+        <div class="step-desc">User filters by sector, applies factor thresholds (e.g., Quality Score > 70, Momentum Rank top 20%), and sorts by composite alpha signal. The ranked list updates in under 500ms using pre-computed feature store data.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Company Quick View — Signal Card</div>
+        <div class="step-desc">Clicking a company opens a signal card: composite score, factor breakdown (Quality / Value / Momentum / Risk), 12-month return chart, recent news headline sentiment, and quick-access link to Deep Research Mode. All computed from cache — no live query.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Export Universe Scorecard</div>
+        <div class="step-desc">User exports the full ranked universe as Excel (structured factor table with all sub-scores) or JSON (API-ready). Export includes timestamp, data vintage, model version, and confidence flags per company.</div>
+      </div>
+    </div>
+  </div>
+
+  <h4>Deep Research Mode Flow — Institutional Analysis</h4>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Research Session Initiation</div>
+        <div class="step-desc">User selects a company (or enters a custom ticker/name). Optionally uploads documents: annual report PDFs, earnings call transcripts, custom Excel financial model. System detects file types, begins parallel ingestion across all sources.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Document Processing Pipeline (Background)</div>
+        <div class="step-desc">Uploaded PDFs are parsed (layout-aware extraction), tables extracted and structured, text semantically chunked, entities tagged (metrics, risks, forward guidance, management commitments). Chunks embedded and indexed into vector store. Progress bar visible to user.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Structured Analysis Sections Generated</div>
+        <div class="step-desc">System automatically generates: (a) Financial Deep Dive — 5-year ratio analysis with trend decomposition; (b) Management Commentary Analysis — guidance vs actual tracking, sentiment scoring; (c) Risk Diagnostic — regulatory, operational, balance sheet; (d) Peer Benchmarking.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Natural Language Query Interface</div>
+        <div class="step-desc">User can ask questions: "What has management said about capex guidance over the past 3 years vs actual spend?" System retrieves relevant chunks from vector store, fuses with structured financial data, generates a grounded response with source citations (document, page, section).</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">5</div>
+      <div class="step-content">
+        <div class="step-title">Report Compilation & Export</div>
+        <div class="step-desc">User clicks "Generate Report." System assembles a PDF research report: executive summary, factor scorecard, financial analysis, qualitative insights, risk diagnostics, management credibility score, charts, and full source citation appendix. Exported as PDF, Excel supplement, or JSON API payload.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 3: HIGH-LEVEL ARCHITECTURE -->
+<!-- ════════════════════════════════ -->
+<div id="s3" class="section">
+  <div class="section-header">
+    <div class="section-number">03</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Three</div>
+      <div class="section-title">High-Level System <em>Architecture</em></div>
+    </div>
+  </div>
+
+  <div class="diagram" data-title="EREBUS — End-to-End System Architecture">
+<span class="diag-muted">╔══════════════════════════════════════════════════════════════════════════════════╗
+║                         CLIENT TIER (Browser / API)                            ║
+║  ┌─────────────────────┐  ┌──────────────────────┐  ┌───────────────────────┐  ║
+║  │  EREBUS Web App     │  │  REST / GraphQL API  │  │  WebSocket (Live Feed)│  ║
+║  │  (React + Plotly)   │  │  (FastAPI / Gateway) │  │  (Signal Streaming)   │  ║
+║  └──────────┬──────────┘  └──────────┬───────────┘  └───────────┬───────────┘  ║
+╚═════════════╪════════════════════════╪═════════════════════════╪══════════════╝
+              │                        │                           │
+╔═════════════╪════════════════════════╪═════════════════════════╪══════════════╗
+║             │      API GATEWAY LAYER │  (Auth, Rate Limit, RBAC)               ║
+║             └────────────────────────┴───────────────────────────┘             ║
+╚═══════════════════════════════════════════════════════════════════════════════╝</span>
+                                        │
+<span class="diag-muted">         ┌──────────────────────────────┴──────────────────────────────┐</span>
+         │                                                               │
+<span class="diag-gold">   ╔══════╧═══════╗                                           ╔═══════╧══════════╗</span>
+<span class="diag-gold">   ║  NORMAL MODE  ║                                           ║  DEEP RESEARCH   ║</span>
+<span class="diag-gold">   ║   PIPELINE    ║                                           ║    PIPELINE      ║</span>
+<span class="diag-gold">   ╚══════╤════════╝                                           ╚═══════╤══════════╝</span>
+          │                                                             │
+<span class="diag-blue">   ┌──────┴──────────┐                                    ┌────────────┴────────────┐</span>
+<span class="diag-blue">   │ Feature Store   │                                    │  Document Intelligence  │</span>
+<span class="diag-blue">   │ (Pre-Computed)  │                                    │  Pipeline (RAG + NLP)   │</span>
+<span class="diag-blue">   │  Redis + PG     │                                    │  + Quant Analysis       │</span>
+<span class="diag-blue">   └──────┬──────────┘                                    └────────────┬────────────┘</span>
+          │                                                             │
+<span class="diag-muted">          └──────────────────────┬──────────────────────────────────────┘</span>
+                                 │
+<span class="diag-green">              ╔══════════════════╧═══════════════════╗</span>
+<span class="diag-green">              ║          REASONING ENGINE             ║</span>
+<span class="diag-green">              ║  Quant Signal + NLP Signal Fusion     ║</span>
+<span class="diag-green">              ║  Explainability · Risk Diagnostics    ║</span>
+<span class="diag-green">              ╚══════════════════╤═══════════════════╝</span>
+                                 │
+<span class="diag-muted">     ┌───────────────────────────┴──────────────────────────┐</span>
+     │                                                        │
+<span class="diag-purple">  ╔══╧══════════════╗                              ╔═════════╧══════════╗</span>
+<span class="diag-purple">  ║  DATA LAYER     ║                              ║  EXPORT ENGINE     ║</span>
+<span class="diag-purple">  ║  ─────────────  ║                              ║  ──────────────    ║</span>
+<span class="diag-purple">  ║  S3 Data Lake   ║                              ║  PDF Generator     ║</span>
+<span class="diag-purple">  ║  TimescaleDB    ║                              ║  Excel Builder     ║</span>
+<span class="diag-purple">  ║  Qdrant Vector  ║                              ║  JSON Serializer   ║</span>
+<span class="diag-purple">  ║  Redis Cache    ║                              ╚════════════════════╝</span>
+<span class="diag-purple">  ╚═════════════════╝</span>
+
+<span class="diag-muted">     ┌───────────────────────────────────────────────────────┐</span>
+<span class="diag-muted">     │              EXTERNAL DATA SOURCES                    │</span>
+<span class="diag-muted">     │  NSE/BSE Feeds · SEBI EDGAR · Earnings APIs          │</span>
+<span class="diag-muted">     │  News Feeds (Reuters/Bloomberg) · User Uploads       │</span>
+<span class="diag-muted">     └───────────────────────────────────────────────────────┘</span>
+  </div>
+
+  <h3>3.1 Layered Architecture</h3>
+
+  <table>
+    <thead><tr><th>Layer</th><th>Components</th><th>Responsibility</th><th>Tech Stack</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Client</strong></td><td>Web App, Mobile-Responsive</td><td>UI, visualization, user interaction, file upload</td><td>React 18, Plotly.js, TanStack Query</td></tr>
+      <tr><td><strong>API Gateway</strong></td><td>Auth, Rate Limiting, RBAC</td><td>Request routing, authentication, access control</td><td>AWS API Gateway + Kong / Nginx</td></tr>
+      <tr><td><strong>Orchestration</strong></td><td>Normal/Deep Mode Router</td><td>Route requests, manage async job queue</td><td>FastAPI, Celery, Redis Queue</td></tr>
+      <tr><td><strong>Intelligence</strong></td><td>Feature Store, RAG, Reasoning</td><td>Signal computation, document retrieval, reasoning fusion</td><td>Python, LangChain, scikit-learn, Transformers</td></tr>
+      <tr><td><strong>Data</strong></td><td>Lake, RDBMS, Vector DB, Cache</td><td>Storage, retrieval, indexing</td><td>S3, TimescaleDB, Qdrant, Redis</td></tr>
+      <tr><td><strong>Export</strong></td><td>PDF, Excel, JSON engines</td><td>Report generation and delivery</td><td>ReportLab, openpyxl, Jinja2</td></tr>
+      <tr><td><strong>Infra</strong></td><td>CI/CD, Monitoring, Security</td><td>Deployment, observability, compliance</td><td>AWS EKS, Terraform, Datadog, Vault</td></tr>
+    </tbody>
+  </table>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 4: MODE ARCHITECTURE -->
+<!-- ════════════════════════════════ -->
+<div id="s4" class="section">
+  <div class="section-header">
+    <div class="section-number">04</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Four</div>
+      <div class="section-title">Mode Architecture — <em>Normal vs Deep</em></div>
+    </div>
+  </div>
+
+  <div class="mode-compare">
+    <div class="mode-col">
+      <div class="mode-badge badge-normal">Normal Mode</div>
+      <div class="mode-col-header">Market Intelligence Layer</div>
+      <hr>
+      <h5>Design Goal</h5>
+      <p style="font-size:13px;">Sub-2-second responses for universe-wide queries. Data is pre-computed and cached. No live model inference during request handling.</p>
+      <h5>Trigger</h5>
+      <p style="font-size:13px;">User views dashboard, requests universe scorecard, queries single-company signal card, exports ranked list.</p>
+      <h5>Data Sources</h5>
+      <ul>
+        <li>Pre-computed feature store (Redis + TimescaleDB)</li>
+        <li>Latest market price data (T+0)</li>
+        <li>Latest fundamental snapshot (T+1)</li>
+        <li>Pre-aggregated sentiment index</li>
+      </ul>
+      <h5>Processing Pipeline</h5>
+      <ul>
+        <li>Cache hit check (Redis, TTL 5 min)</li>
+        <li>Feature store retrieval (≤ 50ms)</li>
+        <li>Score aggregation and ranking (≤ 200ms)</li>
+        <li>Response serialization</li>
+      </ul>
+      <h5>Output</h5>
+      <ul>
+        <li>Ranked universe table with composite scores</li>
+        <li>Factor breakdowns (Quality, Value, Momentum, Risk)</li>
+        <li>Signal cards (Strength, Risk, Trend)</li>
+        <li>Heatmaps and sparklines</li>
+      </ul>
+      <h5>Latency Budget</h5>
+      <p style="font-size:13px;">Cache hit: ≤ 200ms. Cache miss (recompute): ≤ 2s. P99 target: ≤ 3s under peak load.</p>
+    </div>
+    <div class="mode-col">
+      <div class="mode-badge badge-deep">Deep Research Mode</div>
+      <div class="mode-col-header">Institutional Analysis Layer</div>
+      <hr>
+      <h5>Design Goal</h5>
+      <p style="font-size:13px;">Comprehensive, multi-source, document-grounded analysis. Accepts cold (no prior data) or warm (existing company data) sessions. Designed for investigative depth, not speed.</p>
+      <h5>Trigger</h5>
+      <p style="font-size:13px;">User initiates research session for a specific company, optionally uploads documents, requests analyst-grade report generation.</p>
+      <h5>Data Sources</h5>
+      <ul>
+        <li>User-uploaded documents (PDFs, Excel, text)</li>
+        <li>Historical financial database (5–10 years)</li>
+        <li>SEBI filings, EDGAR documents (auto-fetched)</li>
+        <li>Earnings call transcripts (vendor API)</li>
+        <li>News corpus (last 24 months, indexed)</li>
+        <li>Pre-computed feature store (supplemental)</li>
+      </ul>
+      <h5>Processing Pipeline</h5>
+      <ul>
+        <li>File ingestion and type detection</li>
+        <li>PDF parsing → chunk → embed → index</li>
+        <li>Historical financial computation (all ratios)</li>
+        <li>NLP pipeline (sentiment, entity, guidance)</li>
+        <li>Multi-source RAG retrieval and synthesis</li>
+        <li>Reasoning engine fusion and report generation</li>
+      </ul>
+      <h5>Output</h5>
+      <ul>
+        <li>Full analyst research report (PDF, 15–25 pages)</li>
+        <li>Factor scorecard with historical trends</li>
+        <li>Management credibility score + evidence</li>
+        <li>Risk diagnostic with source citations</li>
+        <li>Guidance vs actual deviation analysis</li>
+        <li>Interactive charts (downloadable)</li>
+      </ul>
+      <h5>Latency Budget</h5>
+      <p style="font-size:13px;">Warm session (existing index): ≤ 90 seconds. Cold session (upload + index + full analysis): ≤ 4 minutes. Async job with progress streaming via WebSocket.</p>
+    </div>
+  </div>
+
+  <h3>4.1 Mode Routing Logic</h3>
+
+  <pre data-label="Python · Mode Router">
+<span class="cm"># orchestration/mode_router.py</span>
+
+<span class="kw">class</span> <span class="fn">ModeRouter</span>:
+    <span class="str">"""
+    Routes incoming research requests to either the Normal Mode pipeline
+    (fast, pre-computed) or Deep Research Mode pipeline (multi-modal, async).
+
+    Decision is based on: request_type, document_uploads, time_horizon,
+    and user role permissions.
+    """</span>
+
+    MODE_THRESHOLDS = {
+        <span class="str">"max_companies_normal"</span>: <span class="num">50</span>,  <span class="cm"># beyond this, always async</span>
+        <span class="str">"deep_trigger_horizon_years"</span>: <span class="num">2</span>,  <span class="cm"># historical data > 2Y triggers deep</span>
+        <span class="str">"min_doc_size_mb_for_async"</span>: <span class="num">1.0</span>,
+    }
+
+    <span class="kw">def</span> <span class="fn">route</span>(self, request: ResearchRequest) -> ModeDecision:
+        <span class="cm"># Explicit deep mode request</span>
+        <span class="kw">if</span> request.mode == <span class="str">"deep"</span>:
+            <span class="kw">return</span> ModeDecision(mode=<span class="str">"deep"</span>, async_job=<span class="kw">True</span>)
+
+        <span class="cm"># Document upload always triggers deep mode</span>
+        <span class="kw">if</span> request.uploaded_documents:
+            <span class="kw">return</span> ModeDecision(
+                mode=<span class="str">"deep"</span>,
+                async_job=<span class="kw">True</span>,
+                reason=<span class="str">"document_upload"</span>
+            )
+
+        <span class="cm"># Historical horizon check</span>
+        <span class="kw">if</span> request.time_horizon_years > self.MODE_THRESHOLDS[<span class="str">"deep_trigger_horizon_years"</span>]:
+            <span class="kw">return</span> ModeDecision(mode=<span class="str">"deep"</span>, async_job=<span class="kw">True</span>)
+
+        <span class="cm"># Single company, no uploads, current data → Normal Mode</span>
+        <span class="kw">if</span> len(request.company_ids) == <span class="num">1</span> <span class="kw">and not</span> request.uploaded_documents:
+            <span class="kw">return</span> ModeDecision(
+                mode=<span class="str">"normal"</span>,
+                async_job=<span class="kw">False</span>,
+                cache_eligible=<span class="kw">True</span>
+            )
+
+        <span class="cm"># Universe query → Normal Mode with pre-computed scores</span>
+        <span class="kw">if</span> request.universe_query:
+            <span class="kw">return</span> ModeDecision(mode=<span class="str">"normal"</span>, async_job=<span class="kw">False</span>)
+
+        <span class="kw">return</span> ModeDecision(mode=<span class="str">"normal"</span>, async_job=<span class="kw">False</span>)
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 5: DATA ARCHITECTURE -->
+<!-- ════════════════════════════════ -->
+<div id="s5" class="section">
+  <div class="section-header">
+    <div class="section-number">05</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Five</div>
+      <div class="section-title">Data Architecture &amp; <em>Storage Design</em></div>
+    </div>
+  </div>
+
+  <h3>5.1 Data Sources and Ingestion</h3>
+
+  <table>
+    <thead><tr><th>Source</th><th>Type</th><th>Frequency</th><th>Ingestion Method</th><th>Storage Target</th></tr></thead>
+    <tbody>
+      <tr><td>NSE/BSE Price Feed</td><td>Market Data</td><td>Real-time / T+0</td><td>Websocket subscription via data vendor (e.g., ICICI Direct, Upstox APIs or Refinitiv Elektron)</td><td>TimescaleDB (price_ticks hypertable)</td></tr>
+      <tr><td>Fundamental Data</td><td>Financial Statements</td><td>Quarterly (earnings) + Annual</td><td>Vendor API pull (BSE India, CMIE Prowess, Refinitiv) + structured parser for XBRL filings</td><td>TimescaleDB (financials_snapshots), S3 raw archive</td></tr>
+      <tr><td>SEBI EDGAR Filings</td><td>Regulatory Documents</td><td>On-event (filing trigger)</td><td>SEBI EDGAR API polling + webhook (where available). PDF download to S3.</td><td>S3 (document lake), Qdrant (vector index)</td></tr>
+      <tr><td>Earnings Call Transcripts</td><td>Text / Audio</td><td>Quarterly</td><td>Vendor API (Quartr, EarningsCall Transcript API, FactSet) or scraper fallback</td><td>S3 raw, PostgreSQL (transcript_segments), Qdrant</td></tr>
+      <tr><td>News &amp; Sentiment</td><td>Text / Signals</td><td>Real-time</td><td>NewsAPI, Reuters, PTI feed. Processed through NLP pipeline.</td><td>PostgreSQL (news_events), Redis (latest sentiment cache)</td></tr>
+      <tr><td>User Uploads</td><td>PDFs, Excel, Text</td><td>On-demand</td><td>Direct upload via presigned S3 URL. Async processing pipeline triggered.</td><td>S3 (user_uploads/{session_id}/), Qdrant (session namespace)</td></tr>
+      <tr><td>Macro Indicators</td><td>Economic Data</td><td>Monthly / on-release</td><td>RBI, MOSPI APIs. Structured ingestion.</td><td>TimescaleDB (macro_indicators)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Storage Layer Design</h3>
+
+  <h4>Layer 1 — Data Lake (Amazon S3)</h4>
+  <p>All raw documents and data are stored in an immutable, versioned S3 data lake. This serves as the source of truth and audit trail. Partitioning strategy uses Hive-style partitioning for efficient Athena/Glue queries.</p>
+
+  <pre data-label="S3 · Bucket Structure">
+s3://erebus-data-lake/
+├── market-data/
+│   ├── raw/
+│   │   └── prices/{exchange}/{date}/{ticker}.parquet
+│   └── processed/
+│       └── daily-ohlcv/{date}/{universe}.parquet
+├── fundamentals/
+│   ├── raw/{vendor}/{company_id}/{filing_date}/
+│   └── structured/{company_id}/{fiscal_year}/financials.json
+├── documents/
+│   ├── annual-reports/{company_id}/{fiscal_year}/
+│   ├── earnings-transcripts/{company_id}/{quarter}/
+│   ├── regulatory-filings/{company_id}/{filing_type}/{date}/
+│   └── user-uploads/{session_id}/{upload_id}/
+├── embeddings/
+│   └── snapshots/{date}/{index_name}/vectors.bin
+├── model-artifacts/
+│   └── {model_name}/{version}/
+└── audit-logs/
+    └── {year}/{month}/{day}/run_log.jsonl
+  </pre>
+
+  <h4>Layer 2 — Relational Time-Series Database (TimescaleDB on PostgreSQL)</h4>
+
+  <pre data-label="SQL · Schema Design (Key Tables)">
+<span class="cm">-- Hypertable: price data (partitioned by time)</span>
+<span class="kw">CREATE TABLE</span> price_ticks (
+    time            TIMESTAMPTZ   <span class="kw">NOT NULL</span>,
+    company_id      VARCHAR(<span class="num">20</span>)   <span class="kw">NOT NULL</span>,
+    exchange        CHAR(<span class="num">3</span>)       <span class="kw">NOT NULL</span>,  <span class="cm">-- 'NSE' | 'BSE'</span>
+    open            NUMERIC(<span class="num">14</span>,<span class="num">4</span>),
+    high            NUMERIC(<span class="num">14</span>,<span class="num">4</span>),
+    low             NUMERIC(<span class="num">14</span>,<span class="num">4</span>),
+    close           NUMERIC(<span class="num">14</span>,<span class="num">4</span>),
+    volume          BIGINT,
+    delivery_pct    NUMERIC(<span class="num">5</span>,<span class="num">2</span>),
+    data_quality    SMALLINT      DEFAULT <span class="num">1</span>   <span class="cm">-- 1=verified, 0=suspect</span>
+);
+<span class="kw">SELECT</span> create_hypertable(<span class="str">'price_ticks'</span>, <span class="str">'time'</span>);
+<span class="kw">CREATE INDEX</span> ON price_ticks (company_id, time DESC);
+
+<span class="cm">-- Financial snapshots (one row per company per period)</span>
+<span class="kw">CREATE TABLE</span> financial_snapshots (
+    snapshot_id     UUID          <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    company_id      VARCHAR(<span class="num">20</span>)   <span class="kw">NOT NULL</span>,
+    period_end      DATE          <span class="kw">NOT NULL</span>,
+    period_type     CHAR(<span class="num">1</span>)       <span class="kw">NOT NULL</span>,  <span class="cm">-- 'Q' | 'A'</span>
+    currency        CHAR(<span class="num">3</span>)       DEFAULT <span class="str">'INR'</span>,
+    <span class="cm">-- Income Statement</span>
+    revenue         NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    ebitda          NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    ebit            NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    net_income      NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    eps_diluted     NUMERIC(<span class="num">10</span>,<span class="num">4</span>),
+    <span class="cm">-- Balance Sheet</span>
+    total_assets    NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    total_equity    NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    net_debt        NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    <span class="cm">-- Cash Flow</span>
+    cfo             NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    capex           NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    fcf             NUMERIC(<span class="num">18</span>,<span class="num">2</span>),
+    <span class="cm">-- Metadata</span>
+    source_filing   VARCHAR(<span class="num">200</span>),
+    ingested_at     TIMESTAMPTZ   DEFAULT NOW(),
+    data_quality    SMALLINT      DEFAULT <span class="num">1</span>,
+    <span class="kw">UNIQUE</span> (company_id, period_end, period_type)
+);
+
+<span class="cm">-- Feature store (pre-computed signals, updated on schedule)</span>
+<span class="kw">CREATE TABLE</span> feature_store (
+    feature_id      UUID          <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    company_id      VARCHAR(<span class="num">20</span>)   <span class="kw">NOT NULL</span>,
+    computed_at     TIMESTAMPTZ   <span class="kw">NOT NULL</span>,
+    model_version   VARCHAR(<span class="num">20</span>)   <span class="kw">NOT NULL</span>,
+    <span class="cm">-- Quality Factor Components</span>
+    roe             NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    roc             NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    gross_margin    NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    fcf_margin      NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    accruals_ratio  NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    <span class="cm">-- Value Factor Components</span>
+    ev_ebitda       NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    pe_ratio        NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    pb_ratio        NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    earnings_yield  NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    <span class="cm">-- Momentum Factor Components</span>
+    momentum_12_1   NUMERIC(<span class="num">8</span>,<span class="num">4</span>),  <span class="cm">-- 12-month return excl. last month</span>
+    momentum_6_1    NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    rsi_14          NUMERIC(<span class="num">6</span>,<span class="num">2</span>),
+    <span class="cm">-- Risk Factor Components</span>
+    beta_1y         NUMERIC(<span class="num">6</span>,<span class="num">4</span>),
+    volatility_60d  NUMERIC(<span class="num">6</span>,<span class="num">4</span>),
+    debt_to_equity  NUMERIC(<span class="num">8</span>,<span class="num">4</span>),
+    <span class="cm">-- Composite Scores (0-100, percentile-ranked within universe)</span>
+    quality_score   NUMERIC(<span class="num">5</span>,<span class="num">2</span>),
+    value_score     NUMERIC(<span class="num">5</span>,<span class="num">2</span>),
+    momentum_score  NUMERIC(<span class="num">5</span>,<span class="num">2</span>),
+    risk_score      NUMERIC(<span class="num">5</span>,<span class="num">2</span>),
+    composite_alpha NUMERIC(<span class="num">5</span>,<span class="num">2</span>),
+    universe_rank   SMALLINT,
+    <span class="cm">-- Confidence &amp; Data Quality</span>
+    confidence_band CHAR(<span class="num">1</span>),      <span class="cm">-- 'H' | 'M' | 'L'</span>
+    data_coverage   NUMERIC(<span class="num">4</span>,<span class="num">2</span>),  <span class="cm">-- % of features available</span>
+    <span class="kw">UNIQUE</span> (company_id, computed_at, model_version)
+);
+
+<span class="cm">-- Document metadata registry</span>
+<span class="kw">CREATE TABLE</span> document_registry (
+    doc_id          UUID          <span class="kw">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    company_id      VARCHAR(<span class="num">20</span>),
+    session_id      UUID,
+    doc_type        VARCHAR(<span class="num">50</span>),  <span class="cm">-- 'annual_report' | 'transcript' | 'filing' | 'user_upload'</span>
+    fiscal_period   VARCHAR(<span class="num">20</span>),
+    source_url      TEXT,
+    s3_path         TEXT          <span class="kw">NOT NULL</span>,
+    file_size_bytes BIGINT,
+    page_count      INTEGER,
+    language        CHAR(<span class="num">5</span>),
+    indexed_at      TIMESTAMPTZ,
+    chunk_count     INTEGER,
+    vector_namespace VARCHAR(<span class="num">100</span>),
+    parse_status    VARCHAR(<span class="num">20</span>),  <span class="cm">-- 'pending' | 'parsing' | 'indexed' | 'failed'</span>
+    parse_metadata  JSONB,
+    uploaded_by     UUID,
+    created_at      TIMESTAMPTZ   DEFAULT NOW()
+);
+  </pre>
+
+  <h4>Layer 3 — Vector Database (Qdrant)</h4>
+
+  <pre data-label="Python · Qdrant Collection Schema">
+<span class="cm"># vector_store/qdrant_schema.py</span>
+
+QDRANT_COLLECTIONS = {
+    <span class="str">"company_documents"</span>: {
+        <span class="str">"vector_size"</span>: <span class="num">1536</span>,  <span class="cm"># OpenAI text-embedding-3-large</span>
+        <span class="str">"distance"</span>: <span class="str">"Cosine"</span>,
+        <span class="str">"on_disk_payload"</span>: <span class="kw">True</span>,
+        <span class="str">"payload_schema"</span>: {
+            <span class="str">"company_id"</span>: <span class="str">"keyword"</span>,
+            <span class="str">"doc_id"</span>: <span class="str">"keyword"</span>,
+            <span class="str">"doc_type"</span>: <span class="str">"keyword"</span>,
+            <span class="str">"fiscal_period"</span>: <span class="str">"keyword"</span>,
+            <span class="str">"chunk_index"</span>: <span class="str">"integer"</span>,
+            <span class="str">"page_number"</span>: <span class="str">"integer"</span>,
+            <span class="str">"section_title"</span>: <span class="str">"text"</span>,
+            <span class="str">"text_preview"</span>: <span class="str">"text"</span>,  <span class="cm"># first 200 chars for snippet display</span>
+            <span class="str">"contains_table"</span>: <span class="str">"bool"</span>,
+            <span class="str">"contains_guidance"</span>: <span class="str">"bool"</span>,
+            <span class="str">"contains_risk"</span>: <span class="str">"bool"</span>,
+            <span class="str">"entity_metrics"</span>: <span class="str">"text[]"</span>,  <span class="cm"># extracted financial metrics</span>
+            <span class="str">"sentiment_score"</span>: <span class="str">"float"</span>,
+            <span class="str">"session_id"</span>: <span class="str">"keyword"</span>,  <span class="cm"># for session-scoped retrieval</span>
+            <span class="str">"s3_path"</span>: <span class="str">"keyword"</span>,
+            <span class="str">"indexed_at"</span>: <span class="str">"datetime"</span>
+        }
+    },
+    <span class="str">"news_intelligence"</span>: {
+        <span class="str">"vector_size"</span>: <span class="num">1536</span>,
+        <span class="str">"distance"</span>: <span class="str">"Cosine"</span>,
+        <span class="str">"payload_schema"</span>: {
+            <span class="str">"company_id"</span>: <span class="str">"keyword"</span>,
+            <span class="str">"published_at"</span>: <span class="str">"datetime"</span>,
+            <span class="str">"source"</span>: <span class="str">"keyword"</span>,
+            <span class="str">"headline"</span>: <span class="str">"text"</span>,
+            <span class="str">"sentiment"</span>: <span class="str">"float"</span>,  <span class="cm"># -1 to +1</span>
+            <span class="str">"impact_score"</span>: <span class="str">"float"</span>  <span class="cm"># estimated market impact</span>
+        }
+    }
+}
+  </pre>
+
+  <h4>Layer 4 — Cache Layer (Redis)</h4>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Key Pattern</span><span class="spec-val"><code>feature:{universe}:{company_id}:{model_version}</code> → JSON payload (TTL: 5 min market hours, 60 min off-hours)</span></div>
+    <div class="spec-row"><span class="spec-key">Universe Rank</span><span class="spec-val"><code>rank:{universe}:{date}</code> → Sorted set with composite_alpha scores (TTL: 5 min)</span></div>
+    <div class="spec-row"><span class="spec-key">Session State</span><span class="spec-val"><code>session:{session_id}:state</code> → JSON (TTL: 24h)</span></div>
+    <div class="spec-row"><span class="spec-key">Rate Limiting</span><span class="spec-val"><code>ratelimit:{user_id}:{endpoint}</code> → Counter (TTL: 60s)</span></div>
+    <div class="spec-row"><span class="spec-key">Report Cache</span><span class="spec-val"><code>report:{report_id}:status</code> → Job status (TTL: 72h)</span></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 6: FILE INGESTION PIPELINE -->
+<!-- ════════════════════════════════ -->
+<div id="s6" class="section">
+  <div class="section-header">
+    <div class="section-number">06</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Six</div>
+      <div class="section-title">File Ingestion <em>Pipeline</em></div>
+    </div>
+  </div>
+
+  <h3>6.1 File Type Detection</h3>
+
+  <p>File type detection uses a three-layer strategy: MIME type from HTTP headers (unreliable, used as first pass), python-magic library for magic byte inspection (reliable), and extension-based fallback. Each detected type routes to a type-specific parser.</p>
+
+  <pre data-label="Python · File Type Detector">
+<span class="cm"># ingestion/file_detector.py</span>
+<span class="kw">import</span> magic
+<span class="kw">from</span> enum <span class="kw">import</span> Enum
+<span class="kw">from</span> pathlib <span class="kw">import</span> Path
+
+<span class="kw">class</span> <span class="fn">FileType</span>(Enum):
+    PDF     = <span class="str">"application/pdf"</span>
+    EXCEL   = <span class="str">"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"</span>
+    CSV     = <span class="str">"text/csv"</span>
+    TEXT    = <span class="str">"text/plain"</span>
+    WORD    = <span class="str">"application/vnd.openxmlformats-officedocument.wordprocessingml.document"</span>
+    UNKNOWN = <span class="str">"unknown"</span>
+
+<span class="kw">class</span> <span class="fn">FileTypeDetector</span>:
+    MAGIC_TO_TYPE = {
+        <span class="str">"application/pdf"</span>: FileType.PDF,
+        <span class="str">"application/vnd.openxmlformats"</span>: FileType.EXCEL,  <span class="cm"># prefix match</span>
+        <span class="str">"text/csv"</span>: FileType.CSV,
+        <span class="str">"text/plain"</span>: FileType.TEXT,
+    }
+
+    <span class="kw">def</span> <span class="fn">detect</span>(self, file_bytes: bytes, filename: str) -> FileType:
+        <span class="cm"># Primary: magic bytes</span>
+        mime = magic.from_buffer(file_bytes[:4096], mime=<span class="kw">True</span>)
+        <span class="kw">for</span> prefix, ftype <span class="kw">in</span> self.MAGIC_TO_TYPE.items():
+            <span class="kw">if</span> mime.startswith(prefix):
+                <span class="kw">return</span> ftype
+
+        <span class="cm"># Fallback: extension</span>
+        ext = Path(filename).suffix.lower()
+        ext_map = {<span class="str">".pdf"</span>: FileType.PDF, <span class="str">".xlsx"</span>: FileType.EXCEL,
+                   <span class="str">".xls"</span>: FileType.EXCEL, <span class="str">".csv"</span>: FileType.CSV,
+                   <span class="str">".txt"</span>: FileType.TEXT, <span class="str">".docx"</span>: FileType.WORD}
+        <span class="kw">return</span> ext_map.get(ext, FileType.UNKNOWN)
+  </pre>
+
+  <h3>6.2 Parsing Strategies</h3>
+
+  <h4>PDF Parsing</h4>
+  <p>PDF parsing uses a two-path strategy depending on the PDF type detected (digital native vs scanned):</p>
+
+  <div class="two-col">
+    <div>
+      <h5>Path A — Digital Native PDF</h5>
+      <ul>
+        <li>Primary parser: <code>pdfplumber</code> (layout-aware, preserves table structure)</li>
+        <li>Fallback: <code>PyMuPDF</code> (fitz) for complex layouts</li>
+        <li>Table detection: bounding box heuristics + line detection</li>
+        <li>Table extraction: <code>pdfplumber.extract_tables()</code> → DataFrame</li>
+        <li>Text extraction: paragraph-boundary detection via whitespace analysis</li>
+        <li>Section detection: heading style analysis (font size, bold flags)</li>
+      </ul>
+    </div>
+    <div>
+      <h5>Path B — Scanned / Image PDF</h5>
+      <ul>
+        <li>Detection: entropy analysis + embedded text ratio check</li>
+        <li>OCR Engine: <code>Tesseract 5.x</code> (primary), <code>AWS Textract</code> (high-value documents)</li>
+        <li>Pre-processing: Deskew (OpenCV), denoise, contrast normalization</li>
+        <li>Table OCR: AWS Textract AnalyzeDocument (AnalyzeFeatureType.TABLES)</li>
+        <li>Quality gate: minimum 85% OCR confidence score required; low-confidence regions flagged</li>
+      </ul>
+    </div>
+  </div>
+
+  <h4>Excel / CSV Parsing</h4>
+  <pre data-label="Python · Excel Parser">
+<span class="cm"># ingestion/excel_parser.py</span>
+<span class="kw">import</span> openpyxl
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="kw">class</span> <span class="fn">ExcelIngestionPipeline</span>:
+    <span class="str">"""
+    Intelligent Excel parser: auto-detects financial statement structure,
+    handles multi-tab workbooks, extracts named ranges and metadata.
+    """</span>
+
+    FINANCIAL_STMT_KEYWORDS = {
+        <span class="str">"income"</span>: <span class="str">"income_statement"</span>,
+        <span class="str">"p&l"</span>: <span class="str">"income_statement"</span>,
+        <span class="str">"profit"</span>: <span class="str">"income_statement"</span>,
+        <span class="str">"balance sheet"</span>: <span class="str">"balance_sheet"</span>,
+        <span class="str">"cash flow"</span>: <span class="str">"cash_flow"</span>,
+        <span class="str">"segment"</span>: <span class="str">"segment_data"</span>,
+        <span class="str">"assumptions"</span>: <span class="str">"model_assumptions"</span>
+    }
+
+    <span class="kw">def</span> <span class="fn">ingest</span>(self, file_bytes: bytes, filename: str) -> IngestionResult:
+        wb = openpyxl.load_workbook(BytesIO(file_bytes), data_only=<span class="kw">True</span>)
+        sheets = {}
+
+        <span class="kw">for</span> sheet_name <span class="kw">in</span> wb.sheetnames:
+            ws = wb[sheet_name]
+            sheet_type = self._classify_sheet(sheet_name, ws)
+
+            <span class="kw">if</span> sheet_type == <span class="str">"financial"</span>:
+                df = self._extract_financial_dataframe(ws)
+                normalized = self._normalize_financial_periods(df)
+                sheets[sheet_name] = FinancialSheetData(
+                    type=sheet_type,
+                    dataframe=normalized,
+                    detected_periods=self._extract_periods(df),
+                    metrics_found=self._identify_line_items(df)
+                )
+            <span class="kw">elif</span> sheet_type == <span class="str">"assumptions"</span>:
+                sheets[sheet_name] = self._extract_key_value_pairs(ws)
+
+        <span class="kw">return</span> IngestionResult(sheets=sheets, source_filename=filename)
+  </pre>
+
+  <h3>6.3 Metadata Tagging and Indexing</h3>
+
+  <p>Every ingested document is enriched with a structured metadata envelope before indexing. This metadata enables precise filtered retrieval in the RAG system and populates the document registry.</p>
+
+  <pre data-label="JSON · Document Metadata Envelope">
+{
+  "doc_id": "f3a8c2d1-...",
+  "company_id": "HDFCBANK",
+  "company_name": "HDFC Bank Limited",
+  "doc_type": "annual_report",
+  "fiscal_period": "FY2024",
+  "fiscal_year": 2024,
+  "period_end_date": "2024-03-31",
+  "source": "user_upload",
+  "page_count": 342,
+  "language": "en",
+  "parse_path": "digital_native",
+  "ocr_confidence": null,
+  "extracted_metrics": ["NII", "NIM", "GNPA", "NNPA", "CAR", "ROA", "ROE"],
+  "section_index": {
+    "Management Discussion &amp; Analysis": {"start_page": 45, "end_page": 98},
+    "Financial Statements": {"start_page": 180, "end_page": 280},
+    "Directors Report": {"start_page": 30, "end_page": 44},
+    "Risk Management": {"start_page": 99, "end_page": 145}
+  },
+  "tables_extracted": 47,
+  "chunks_created": 286,
+  "vector_namespace": "hdfcbank_fy2024_f3a8c2d1",
+  "data_quality_flags": [],
+  "indexed_at": "2024-11-01T14:23:11Z"
+}
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 7: DOCUMENT INTELLIGENCE -->
+<!-- ════════════════════════════════ -->
+<div id="s7" class="section">
+  <div class="section-header">
+    <div class="section-number">07</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Seven</div>
+      <div class="section-title">Document Intelligence <em>Pipeline</em></div>
+    </div>
+  </div>
+
+  <h3>7.1 Semantic Chunking Strategy</h3>
+
+  <p>Naive fixed-size chunking destroys semantic coherence in financial documents (e.g., splitting a table mid-row or cutting a paragraph mid-argument). EREBUS uses a hierarchical semantic chunking strategy:</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Document Segmentation</div>
+        <div class="step-desc">Identify major structural sections using heading detection (font metadata for digital, layout heuristics for OCR output). Create top-level segments: "MD&A", "Financial Statements", "Risk Factors", "Directors' Report", etc.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Paragraph-Boundary Chunking</div>
+        <div class="step-desc">Within each section, split at paragraph boundaries. Target chunk size: 400–600 tokens (empirically optimal for financial text retrieval). Apply sliding window overlap of 50 tokens to preserve cross-paragraph context.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">Table Handling — Separate Track</div>
+        <div class="step-desc">Tables are extracted separately and NOT split. Each table becomes one chunk with structured metadata: column headers, row labels, cell values as key-value pairs (serialized). Tables also generate a natural-language summary chunk for semantic search.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">Chunk Enrichment</div>
+        <div class="step-desc">Each chunk receives: section_title, page_number, chunk_index, parent_doc_id, contains_guidance flag (pattern-matched), contains_table flag, entity_metrics list (extracted numbers + metric names), sentiment_score (FinBERT inference).</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>7.2 Entity Extraction</h3>
+
+  <p>Financial document entity extraction goes beyond generic NER. EREBUS deploys a domain-specific extraction pipeline:</p>
+
+  <pre data-label="Python · Financial Entity Extractor">
+<span class="cm"># nlp/entity_extractor.py</span>
+<span class="kw">import</span> spacy
+<span class="kw">import</span> re
+<span class="kw">from</span> transformers <span class="kw">import</span> pipeline <span class="kw">as</span> hf_pipeline
+
+<span class="kw">class</span> <span class="fn">FinancialEntityExtractor</span>:
+    <span class="str">"""
+    Extracts structured entities from financial document chunks:
+    - Quantitative metrics (revenue, PAT, EPS, etc.) with values and periods
+    - Forward guidance statements (future-tense + metric pattern)
+    - Management commitments ("we expect", "we target", "guidance of X")
+    - Risk disclosures (NPA, litigation, regulatory risk language)
+    - Competitive positioning claims
+    """</span>
+
+    GUIDANCE_PATTERNS = [
+        <span class="cm"># Regex for guidance detection</span>
+        r<span class="str">r"(?:we (?:expect|guide|target|aim|project)|guidance of|outlook for)\s+.{5,150}"</span>,
+        r<span class="str">r"(?:FY\d{2,4}|next (?:year|quarter|fiscal))\s+.{5,80}(?:crore|%|bps|basis points)"</span>,
+        r<span class="str">r"(?:capex|expansion|investment)\s+(?:of|at|around)\s+₹?\s*[\d,.]+"</span>,
+    ]
+
+    <span class="kw">def</span> <span class="fn">extract</span>(self, chunk_text: str, chunk_metadata: dict) -> ExtractedEntities:
+        <span class="cm"># 1. Quantitative metric extraction (custom regex + spaCy NER)</span>
+        metrics = self._extract_metrics(chunk_text)
+
+        <span class="cm"># 2. Guidance detection</span>
+        guidance = []
+        <span class="kw">for</span> pattern <span class="kw">in</span> self.GUIDANCE_PATTERNS:
+            matches = re.findall(pattern, chunk_text, re.IGNORECASE)
+            guidance.extend([GuidanceStatement(text=m, source_chunk=chunk_metadata) 
+                             <span class="kw">for</span> m <span class="kw">in</span> matches])
+
+        <span class="cm"># 3. Risk language extraction</span>
+        risk_flags = self._detect_risk_language(chunk_text)
+
+        <span class="cm"># 4. Management tone analysis (FinBERT)</span>
+        sentiment = self.finbert_pipeline(chunk_text[:512])[<span class="num">0</span>]
+
+        <span class="kw">return</span> ExtractedEntities(
+            metrics=metrics,
+            guidance_statements=guidance,
+            risk_flags=risk_flags,
+            sentiment=sentiment,
+            has_forward_guidance=len(guidance) > <span class="num">0</span>
+        )
+  </pre>
+
+  <h3>7.3 Management Credibility Engine</h3>
+
+  <p>A critical differentiator of EREBUS is its ability to track management guidance against actual outcomes over time. This creates a <strong>Management Credibility Score</strong> — a quantified measure of how accurately management has historically predicted their own company's performance.</p>
+
+  <div class="equation">
+    <div class="equation-label">Management Credibility Score (MCS)</div>
+    <div>
+      MCS<sub>company</sub> = 100 × [1 − mean(|GuidanceDeviation<sub>t</sub>|/|Guidance<sub>t</sub>|)] × CredibilityWeight<br><br>
+      where:<br>
+      GuidanceDeviation<sub>t</sub> = Actual<sub>t</sub> − Guidance<sub>t</sub><br>
+      CredibilityWeight = f(consistency, direction_accuracy, time_horizon)
+    </div>
+  </div>
+
+  <p>Guidance statements are extracted from earnings call transcripts and annual report MD&A sections, tagged with the metric, period, and value. The system then cross-references against actual reported financials in the database, computing deviation statistics per guidance commitment.</p>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 8: FEATURE ENGINEERING -->
+<!-- ════════════════════════════════ -->
+<div id="s8" class="section">
+  <div class="section-header">
+    <div class="section-number">08</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Eight</div>
+      <div class="section-title">Feature Engineering <em>System</em></div>
+    </div>
+  </div>
+
+  <h3>8.1 Financial Ratio Feature Library</h3>
+
+  <table>
+    <thead><tr><th>Category</th><th>Feature Name</th><th>Formula</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td rowspan="5"><strong>Quality</strong></td><td>Return on Equity</td><td>Net Income / Avg. Shareholders' Equity</td><td>Management efficiency; higher is better</td></tr>
+      <tr><td>Return on Capital (ROIC)</td><td>NOPAT / Invested Capital</td><td>Capital allocation quality</td></tr>
+      <tr><td>Gross Margin Stability</td><td>σ(Gross Margin, 5Y) [inverted]</td><td>Pricing power consistency</td></tr>
+      <tr><td>FCF Conversion</td><td>FCF / Net Income</td><td>Earnings quality; accruals detection</td></tr>
+      <tr><td>Accruals Ratio</td><td>(ΔNet Op. Assets) / Avg. Total Assets</td><td>Accounting quality signal</td></tr>
+      <tr><td rowspan="4"><strong>Value</strong></td><td>EV/EBITDA</td><td>Enterprise Value / EBITDA (TTM)</td><td>Relative cheapness; sector-adjusted</td></tr>
+      <tr><td>Earnings Yield</td><td>EBIT(1-t) / Enterprise Value</td><td>Graham-Greenblatt style value</td></tr>
+      <tr><td>P/B with ROE Adj.</td><td>P/B / ROE [Tobin Q variant]</td><td>Value adjusted for quality</td></tr>
+      <tr><td>Dividend Yield + Growth</td><td>(Div Yield) + (5Y Div CAGR)</td><td>Total shareholder yield proxy</td></tr>
+      <tr><td rowspan="4"><strong>Momentum</strong></td><td>Price Momentum (12-1M)</td><td>Return(t-12M to t-1M)</td><td>Cross-sectional momentum factor</td></tr>
+      <tr><td>Earnings Revision Momentum</td><td>ΔEPS Estimate (current vs 3M ago)</td><td>Analyst sentiment signal</td></tr>
+      <tr><td>Revenue Surprise (TTM)</td><td>Σ(Actual Rev - Est Rev)/|Est Rev|, 4Q</td><td>Fundamental momentum</td></tr>
+      <tr><td>Relative Strength vs Index</td><td>Co. Return − Index Return (90D)</td><td>Relative momentum</td></tr>
+      <tr><td rowspan="4"><strong>Risk</strong></td><td>Beta (Rolling 1Y)</td><td>Cov(Co., Market) / Var(Market)</td><td>Systematic risk exposure</td></tr>
+      <tr><td>Idiosyncratic Volatility</td><td>σ(CAPM Residuals, 60D)</td><td>Company-specific risk</td></tr>
+      <tr><td>Debt/Equity Trend</td><td>D/E ratio + ΔD/E (1Y)</td><td>Leverage trajectory</td></tr>
+      <tr><td>Interest Coverage</td><td>EBIT / Interest Expense</td><td>Debt service capacity</td></tr>
+      <tr><td rowspan="3"><strong>NLP-Derived</strong></td><td>Management Sentiment</td><td>FinBERT score on MD&A text (trailing 4Q mean)</td><td>Management tone signal</td></tr>
+      <tr><td>News Sentiment (30D)</td><td>VADER/FinBERT weighted avg on news corpus</td><td>Market narrative signal</td></tr>
+      <tr><td>Guidance Deviation (MCS)</td><td>Management Credibility Score (see §7.3)</td><td>Execution reliability</td></tr>
+    </tbody>
+  </table>
+
+  <h3>8.2 Feature Normalization Pipeline</h3>
+
+  <pre data-label="Python · Feature Normalization">
+<span class="cm"># features/normalization.py</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> scipy.stats <span class="kw">import</span> rankdata
+
+<span class="kw">class</span> <span class="fn">CrossSectionalNormalizer</span>:
+    <span class="str">"""
+    Normalizes features cross-sectionally within each universe refresh.
+    Uses rank-based normalization to be robust against outliers —
+    critical in financial data where extreme values are common.
+    """</span>
+
+    <span class="kw">def</span> <span class="fn">normalize</span>(self, feature_matrix: pd.DataFrame, universe: str) -> pd.DataFrame:
+        <span class="cm"># Step 1: Winsorize at 2.5%/97.5% to handle outliers</span>
+        winsorized = feature_matrix.apply(
+            <span class="kw">lambda</span> col: col.clip(
+                lower=col.quantile(<span class="num">0.025</span>),
+                upper=col.quantile(<span class="num">0.975</span>)
+            )
+        )
+
+        <span class="cm"># Step 2: Cross-sectional rank transformation → [0, 100]</span>
+        <span class="cm"># Rank percentile is more robust than z-score for non-normal distributions</span>
+        ranked = winsorized.apply(
+            <span class="kw">lambda</span> col: (rankdata(col, method=<span class="str">'average'</span>) - <span class="num">1</span>) / (len(col) - <span class="num">1</span>) * <span class="num">100</span>
+        )
+
+        <span class="cm"># Step 3: Handle missing values via sector-median imputation</span>
+        <span class="cm"># (never impute with 50th percentile blindly — use sector peers)</span>
+        <span class="kw">for</span> col <span class="kw">in</span> ranked.columns:
+            <span class="kw">if</span> ranked[col].isna().any():
+                sector_medians = ranked.groupby(<span class="str">'sector'</span>)[col].transform(<span class="str">'median'</span>)
+                ranked[col] = ranked[col].fillna(sector_medians)
+
+        <span class="cm"># Step 4: Invert risk features (higher raw risk = lower score)</span>
+        INVERT_FEATURES = [<span class="str">'beta_1y'</span>, <span class="str">'volatility_60d'</span>, <span class="str">'debt_to_equity'</span>, <span class="str">'accruals_ratio'</span>]
+        <span class="kw">for</span> feat <span class="kw">in</span> INVERT_FEATURES:
+            <span class="kw">if</span> feat <span class="kw">in</span> ranked.columns:
+                ranked[feat] = <span class="num">100</span> - ranked[feat]
+
+        <span class="kw">return</span> ranked
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 9: QUANT MODEL LAYER -->
+<!-- ════════════════════════════════ -->
+<div id="s9" class="section">
+  <div class="section-header">
+    <div class="section-number">09</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Nine</div>
+      <div class="section-title">Quantitative <em>Model Layer</em></div>
+    </div>
+  </div>
+
+  <h3>9.1 Multi-Factor Composite Alpha Score</h3>
+
+  <p>The composite alpha signal is a weighted combination of four factor scores, each of which is a cross-sectionally ranked composite of sub-factors. Weights are calibrated using information coefficient (IC) analysis and updated quarterly. A Barra-style factor model structure is used for orthogonality.</p>
+
+  <div class="equation">
+    <div class="equation-label">Composite Alpha Score</div>
+    <div>
+      α<sub>composite</sub> = w<sub>Q</sub>·S<sub>Q</sub> + w<sub>V</sub>·S<sub>V</sub> + w<sub>M</sub>·S<sub>M</sub> − w<sub>R</sub>·S<sub>R</sub> + w<sub>NLP</sub>·S<sub>NLP</sub><br><br>
+      where all S<sub>i</sub> ∈ [0, 100] (cross-sectional percentile rank)<br><br>
+      Default weights: w<sub>Q</sub> = 0.35, w<sub>V</sub> = 0.25, w<sub>M</sub> = 0.20, w<sub>R</sub> = 0.15, w<sub>NLP</sub> = 0.05<br>
+      Subject to: Σw<sub>i</sub> = 1.0; weights reviewed and recalibrated quarterly via IC-weighted optimization
+    </div>
+  </div>
+
+  <div class="equation">
+    <div class="equation-label">Quality Factor Score (S_Q)</div>
+    <div>
+      S<sub>Q</sub> = 0.30·Rank(ROE) + 0.25·Rank(ROIC) + 0.20·Rank(FCF_Conv) + 0.15·Rank(GM_Stability) + 0.10·Rank(100 − Accruals)<br><br>
+      All Rank() operations are cross-sectional within the trading universe on the computation date.
+    </div>
+  </div>
+
+  <div class="equation">
+    <div class="equation-label">Value Factor Score (S_V)</div>
+    <div>
+      S<sub>V</sub> = 0.40·Rank(100 − EV/EBITDA_rank) + 0.30·Rank(EarningsYield) + 0.20·Rank(P/B_adj) + 0.10·Rank(DividendYield)<br><br>
+      Note: EV/EBITDA is inverted (lower multiple = better value rank).
+    </div>
+  </div>
+
+  <div class="equation">
+    <div class="equation-label">Momentum Factor Score (S_M)</div>
+    <div>
+      S<sub>M</sub> = 0.40·Rank(Ret<sub>12-1M</sub>) + 0.30·Rank(EPS_RevMomentum) + 0.20·Rank(RevSurprise) + 0.10·Rank(RelStrength)<br><br>
+      Momentum is computed over the t-12M to t-1M window (Jegadeesh-Titman formulation with 1-month skip to avoid short-term reversal).
+    </div>
+  </div>
+
+  <div class="equation">
+    <div class="equation-label">Risk Factor Score (S_R) [Penalizer — Higher = More Risk]</div>
+    <div>
+      S<sub>R</sub> = 0.30·Rank(Beta) + 0.30·Rank(IdioVol) + 0.25·Rank(D/E_trend) + 0.15·Rank(100 − InterestCoverage)<br><br>
+      S<sub>R</sub> is used as a PENALTY in the composite score. High risk score reduces alpha_composite.
+    </div>
+  </div>
+
+  <h3>9.2 Factor IC Calibration</h3>
+
+  <pre data-label="Python · IC-Based Weight Optimization">
+<span class="cm"># models/factor_calibration.py</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> scipy.optimize <span class="kw">import</span> minimize
+
+<span class="kw">class</span> <span class="fn">FactorWeightOptimizer</span>:
+    <span class="str">"""
+    Quarterly recalibration of factor weights using Information Coefficient (IC)
+    from historical backtests. Maximizes IC-weighted signal while maintaining
+    diversification across factors.
+    """</span>
+
+    <span class="kw">def</span> <span class="fn">compute_ic</span>(self, factor_scores: pd.DataFrame, 
+                        forward_returns: pd.Series, horizon_months: int = <span class="num">3</span>) -> dict:
+        <span class="cm"># Rank IC (Spearman correlation of factor score rank vs forward return rank)</span>
+        ic_results = {}
+        <span class="kw">for</span> factor <span class="kw">in</span> [<span class="str">'quality'</span>, <span class="str">'value'</span>, <span class="str">'momentum'</span>, <span class="str">'risk'</span>, <span class="str">'nlp'</span>]:
+            ic, p_value = spearmanr(
+                factor_scores[factor].rank(),
+                forward_returns.rank()
+            )
+            ic_results[factor] = {
+                <span class="str">'ic'</span>: ic,
+                <span class="str">'ic_ir'</span>: ic / factor_scores[factor].std(),  <span class="cm"># IC Information Ratio</span>
+                <span class="str">'t_stat'</span>: ic * np.sqrt(len(factor_scores)) / np.sqrt(<span class="num">1</span> - ic**<span class="num">2</span>),
+                <span class="str">'significant'</span>: p_value < <span class="num">0.05</span>
+            }
+        <span class="kw">return</span> ic_results
+
+    <span class="kw">def</span> <span class="fn">optimize_weights</span>(self, ic_results: dict) -> dict:
+        <span class="cm"># Maximize IC-weighted composite; constrain weights ≥ 0.05 for diversification</span>
+        ic_vec = np.array([ic_results[f][<span class="str">'ic'</span>] <span class="kw">for</span> f <span class="kw">in</span> [<span class="str">'quality'</span>, <span class="str">'value'</span>, <span class="str">'momentum'</span>, <span class="str">'risk'</span>, <span class="str">'nlp'</span>]])
+        ic_ir_vec = np.array([ic_results[f][<span class="str">'ic_ir'</span>] <span class="kw">for</span> f <span class="kw">in</span> [<span class="str">'quality'</span>, <span class="str">'value'</span>, <span class="str">'momentum'</span>, <span class="str">'risk'</span>, <span class="str">'nlp'</span>]])
+
+        result = minimize(
+            <span class="kw">lambda</span> w: -np.dot(w, ic_ir_vec),  <span class="cm"># maximize IC IR</span>
+            x0=np.ones(<span class="num">5</span>) / <span class="num">5</span>,
+            constraints=[{<span class="str">'type'</span>: <span class="str">'eq'</span>, <span class="str">'fun'</span>: <span class="kw">lambda</span> w: np.sum(w) - <span class="num">1.0</span>}],
+            bounds=[(<span class="num">0.05</span>, <span class="num">0.50</span>)] * <span class="num">5</span>  <span class="cm"># 5% min, 50% max per factor</span>
+        )
+        <span class="kw">return</span> dict(zip([<span class="str">'quality'</span>, <span class="str">'value'</span>, <span class="str">'momentum'</span>, <span class="str">'risk'</span>, <span class="str">'nlp'</span>], result.x))
+  </pre>
+
+  <h3>9.3 Risk Models</h3>
+
+  <p>Beyond the portfolio-level risk score, EREBUS computes company-level risk diagnostics across four dimensions:</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">Risk Dimension 01</div>
+      <div class="card-title">Financial Risk</div>
+      <div class="card-body">Altman Z-Score variant (adapted for Indian markets), interest coverage deterioration trend, free cash flow negativity persistence, debt maturity concentration.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Risk Dimension 02</div>
+      <div class="card-title">Operational Risk</div>
+      <div class="card-body">Revenue concentration (Herfindahl index for segment revenue), customer/supplier concentration flags, working capital cycle deterioration (DSO/DIO trends), capex vs depreciation ratio.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Risk Dimension 03</div>
+      <div class="card-title">Governance Risk</div>
+      <div class="card-body">Related-party transaction materiality, promoter pledge percentage (NSE/BSE data), auditor qualification flags, frequency of accounting policy changes, board independence score.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Risk Dimension 04</div>
+      <div class="card-title">Regulatory & ESG Risk</div>
+      <div class="card-body">SEBI show-cause notices (scraped from SEBI website), environmental litigation mentions (NLP extraction from filings), pending government/tax disputes (MD&A extraction), ESG rating trend.</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 10: ML LAYER -->
+<!-- ════════════════════════════════ -->
+<div id="s10" class="section">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Ten</div>
+      <div class="section-title">Machine Learning <em>Layer</em></div>
+    </div>
+  </div>
+
+  <div class="callout callout-insight">
+    <div class="callout-label">Architecture Decision</div>
+    <p>EREBUS deliberately avoids deep learning complexity in the core ranking model. The primary quant model (§9) uses transparent factor arithmetic. ML is deployed only where it demonstrably outperforms rule-based approaches AND where explainability can be maintained (via SHAP). This ensures auditability and avoids the trap of over-parameterized models that backfit to noise.</p>
+  </div>
+
+  <h3>10.1 ML Use Cases and Model Selection</h3>
+
+  <table>
+    <thead><tr><th>Use Case</th><th>Model</th><th>Justification</th><th>Output</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Alpha Quintile Ranking</strong></td><td>LightGBM Ranker (LambdaMART)</td><td>Gradient boosted trees handle non-linear interactions between factors; robust to outliers; SHAP-compatible. LambdaMART directly optimizes ranking quality (NDCG).</td><td>Quintile rank (1–5) with feature importance</td></tr>
+      <tr><td><strong>Earnings Surprise Prediction</strong></td><td>XGBoost Classifier</td><td>Tabular data with mixed feature types. Tree-based models outperform linear models for financial ratio prediction. Interpretable via SHAP.</td><td>Beat/Miss/Meet probability with confidence band</td></tr>
+      <tr><td><strong>Regime Classification</strong></td><td>Hidden Markov Model (HMM)</td><td>Market regime (Risk-On / Risk-Off / Transition) has temporal dependency that HMM explicitly models. Gaussian emission for factor return distributions per regime.</td><td>Current regime + transition probability</td></tr>
+      <tr><td><strong>Anomaly Detection (Accounting)</strong></td><td>Isolation Forest</td><td>Unsupervised; no labeled training data required. Effective at detecting unusual combinations of accounting ratios (Beneish M-Score augmented).</td><td>Anomaly score + feature contribution</td></tr>
+      <tr><td><strong>Document Relevance Reranking</strong></td><td>Cross-Encoder (FinancialBERT fine-tuned)</td><td>For RAG reranking, a cross-encoder outperforms bi-encoder cosine similarity by jointly encoding query and passage. Fine-tuned on financial QA pairs.</td><td>Relevance score per retrieved chunk</td></tr>
+    </tbody>
+  </table>
+
+  <h3>10.2 Overfitting Prevention Framework</h3>
+
+  <div class="two-col">
+    <div>
+      <h5>Model Complexity Controls</h5>
+      <ul>
+        <li>LightGBM: max_depth=6, num_leaves=31, min_child_samples=50 (conservative)</li>
+        <li>Mandatory walk-forward cross-validation (no look-ahead)</li>
+        <li>Purging: 3-month embargo period between train and test to prevent data leakage</li>
+        <li>Combinatorial Purged CV (CPCV) for robust out-of-sample evaluation</li>
+      </ul>
+    </div>
+    <div>
+      <h5>Signal Validity Gates</h5>
+      <ul>
+        <li>Minimum IC threshold: 0.05 (5% rank correlation required for deployment)</li>
+        <li>IC t-statistic ≥ 2.0 required</li>
+        <li>Out-of-sample Sharpe ratio of factor ≥ 0.30 required</li>
+        <li>Monthly model monitoring: IC decay triggers retraining flag</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 11: RAG SYSTEM -->
+<!-- ════════════════════════════════ -->
+<div id="s11" class="section">
+  <div class="section-header">
+    <div class="section-number">11</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Eleven</div>
+      <div class="section-title">RAG System <em>Design</em></div>
+    </div>
+  </div>
+
+  <h3>11.1 Embedding Strategy</h3>
+
+  <p>EREBUS uses a dual-embedding strategy to handle the semantic diversity of financial documents — some content is best retrieved by semantic meaning (MD&A commentary, risk language), while numerical tables require exact matching.</p>
+
+  <div class="two-col">
+    <div>
+      <h5>Semantic Embedding Model</h5>
+      <p style="font-size:13px; font-weight:300;">Primary: <code>text-embedding-3-large</code> (OpenAI) — 3072 dimensions, compressed to 1536 via PCA projection trained on financial corpus. Used for: narrative text, MD&A, earnings call transcripts, risk discussions.</p>
+      <p style="font-size:13px; font-weight:300;">Fallback (on-premise option): <code>FinancialBERT-embeddings</code> fine-tuned on NSE/BSE filings corpus. Used when API unavailability or cost concerns arise.</p>
+    </div>
+    <div>
+      <h5>Sparse / Keyword Index</h5>
+      <p style="font-size:13px; font-weight:300;">BM25 index (Elasticsearch or Qdrant sparse vectors) for exact metric name matching ("NIM", "GNPA", specific revenue figures). Financial users often search for exact terms — pure semantic search misses these.</p>
+      <p style="font-size:13px; font-weight:300;">Hybrid retrieval fusion via Reciprocal Rank Fusion (RRF) combines dense and sparse results before reranking.</p>
+    </div>
+  </div>
+
+  <h3>11.2 Retrieval Pipeline</h3>
+
+  <div class="diagram" data-title="RAG Retrieval Pipeline — Query to Grounded Response">
+<span class="diag-muted">User Query: "What is management's guidance on NIM for FY25 and how does it compare to FY24 actuals?"</span>
+
+         │
+         ▼
+<span class="diag-gold">┌─────────────────────────────────────────────────────────┐</span>
+<span class="diag-gold">│               QUERY UNDERSTANDING LAYER                  │</span>
+<span class="diag-gold">│  • Entity extraction: metric=NIM, periods=[FY25, FY24]  │</span>
+<span class="diag-gold">│  • Intent: guidance_comparison + actual_comparison       │</span>
+<span class="diag-gold">│  • Filter derivation: doc_type in [transcript, annual]  │</span>
+<span class="diag-gold">└──────────────────────────────┬──────────────────────────┘</span>
+                               │
+              ┌────────────────┴────────────────┐
+              │                                 │
+<span class="diag-blue">    ┌─────────┴──────────┐          ┌──────────┴───────────┐</span>
+<span class="diag-blue">    │  DENSE RETRIEVAL   │          │  SPARSE RETRIEVAL     │</span>
+<span class="diag-blue">    │  (Qdrant ANN)      │          │  (BM25 / Elastic)     │</span>
+<span class="diag-blue">    │  top-k=20 semantic │          │  top-k=10 keyword     │</span>
+<span class="diag-blue">    │  filtered by:      │          │  filtered by:         │</span>
+<span class="diag-blue">    │  company_id=HDFCBK │          │  contains_guidance=T  │</span>
+<span class="diag-blue">    │  fiscal_period ∈   │          │  entity_metrics⊇NIM   │</span>
+<span class="diag-blue">    │  [FY24, FY25]      │          └──────────┬───────────┘</span>
+<span class="diag-blue">    └─────────┬──────────┘                     │</span>
+              └────────────────┬────────────────┘
+                               │  ~30 candidates
+                               ▼
+<span class="diag-green">              ┌────────────────────────────────┐</span>
+<span class="diag-green">              │    RECIPROCAL RANK FUSION      │</span>
+<span class="diag-green">              │  RRF(dense_rank, sparse_rank)  │</span>
+<span class="diag-green">              └────────────────┬───────────────┘</span>
+                               │
+                               ▼
+<span class="diag-green">              ┌────────────────────────────────┐</span>
+<span class="diag-green">              │   CROSS-ENCODER RERANKER       │</span>
+<span class="diag-green">              │   FinancialBERT cross-encoder   │</span>
+<span class="diag-green">              │   scores (query, chunk) pairs   │</span>
+<span class="diag-green">              │   → top-5 chunks retained      │</span>
+<span class="diag-green">              └────────────────┬───────────────┘</span>
+                               │  5 high-confidence chunks
+                               ▼
+<span class="diag-purple">         ┌─────────────────────────────────────────┐</span>
+<span class="diag-purple">         │           STRUCTURED DATA FUSION        │</span>
+<span class="diag-purple">         │  Pull NIM actuals from financial_snapshots│</span>
+<span class="diag-purple">         │  for FY24 (TimescaleDB query)            │</span>
+<span class="diag-purple">         └─────────────────┬───────────────────────┘</span>
+                           │
+                           ▼
+<span class="diag-gold">    ┌──────────────────────────────────────────────────────┐</span>
+<span class="diag-gold">    │                  PROMPT ASSEMBLY                      │</span>
+<span class="diag-gold">    │  System: "You are an institutional equity analyst...  │</span>
+<span class="diag-gold">    │  Answer ONLY from the provided context. If you cannot │</span>
+<span class="diag-gold">    │  find the answer in context, say INSUFFICIENT DATA."  │</span>
+<span class="diag-gold">    │  [RETRIEVED CONTEXT — 5 chunks with source metadata] │</span>
+<span class="diag-gold">    │  [STRUCTURED DATA — NIM actuals table]               │</span>
+<span class="diag-gold">    │  User Question: [query]                              │</span>
+<span class="diag-gold">    └──────────────────────────────────────────────────────┘</span>
+                           │
+                           ▼
+<span class="diag-muted">    ┌──────────────────────────────────────────────────────┐</span>
+<span class="diag-muted">    │  LLM RESPONSE → Citation Extraction → GROUNDED OUTPUT│</span>
+<span class="diag-muted">    │  Every claim tagged with: [Source: AR FY25, p.67]    │</span>
+<span class="diag-muted">    └──────────────────────────────────────────────────────┘</span>
+  </div>
+
+  <h3>11.3 Hallucination Prevention</h3>
+
+  <div class="callout callout-warning">
+    <div class="callout-label">Critical Safety Requirement</div>
+    <p>Hallucination in an institutional research context has direct financial consequences. The system treats hallucination prevention as a first-order design requirement, not a post-hoc mitigation.</p>
+  </div>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Context-Only Grounding</span><span class="spec-val">LLM system prompt explicitly forbids generating claims not present in retrieved context. Uses constitutional prompting: "If the answer is not in the provided context, respond: INSUFFICIENT_DATA: [specific gap description]"</span></div>
+    <div class="spec-row"><span class="spec-key">Citation Extraction</span><span class="spec-val">Post-generation pipeline extracts all cited facts and verifies each against the retrieved chunk corpus. Any claim without a verifiable source chunk triggers a refusal flag.</span></div>
+    <div class="spec-row"><span class="spec-key">Faithfulness Scoring</span><span class="spec-val">NLI-based faithfulness scorer (cross-encoder) evaluates each sentence of the LLM output against its cited source chunk. Faithfulness score < 0.7 triggers response quarantine and human review flag.</span></div>
+    <div class="spec-row"><span class="spec-key">Numerical Verification</span><span class="spec-val">All numbers mentioned in LLM output are programmatically extracted and cross-checked against the structured financial database. Mismatched numbers trigger an inline warning tag.</span></div>
+    <div class="spec-row"><span class="spec-key">Refusal Policy</span><span class="spec-val">System refuses (returns INSUFFICIENT_DATA) rather than speculates. The refusal itself is informative: it tells the analyst exactly what data is missing and suggests what to upload.</span></div>
+  </div>
+
+  <h3>11.4 Prompt Engineering</h3>
+
+  <pre data-label="Prompt Template · Deep Research QA">
+<span class="cm">## SYSTEM PROMPT (EREBUS Research Intelligence v1.0)</span>
+
+You are an institutional equity research analyst assistant operating
+within the EREBUS platform at [FIRM NAME]. Your responses are used
+to inform investment decisions by senior fund managers and analysts.
+
+<span class="cm">## CORE RULES — NON-NEGOTIABLE:</span>
+1. Answer ONLY from the provided CONTEXT documents and STRUCTURED DATA.
+2. Never extrapolate, speculate, or use general knowledge beyond what
+   is explicitly stated in the context.
+3. For every factual claim, you MUST include a citation in the format:
+   [Source: {doc_type}, {fiscal_period}, Page {page_number}]
+4. If the required information is not in the context, respond with:
+   INSUFFICIENT_DATA: {specific description of missing information}
+   Do NOT attempt to answer with general knowledge.
+5. Distinguish clearly between:
+   - ACTUAL REPORTED DATA (historical fact)
+   - MANAGEMENT GUIDANCE (forward-looking, unverified)
+   - ANALYST ESTIMATE (third-party projection)
+6. Flag any inconsistencies you detect between sources explicitly.
+
+<span class="cm">## OUTPUT FORMAT:</span>
+- Lead with a direct answer to the question
+- Follow with supporting evidence (quoted sparingly, paraphrased where possible)
+- Conclude with data quality note: confidence level (High/Medium/Low)
+  based on source recency, source authority, and consistency across documents
+
+<span class="cm">## CONTEXT:</span>
+{retrieved_chunks_with_metadata}
+
+<span class="cm">## STRUCTURED DATA:</span>
+{financial_data_table}
+
+<span class="cm">## USER QUESTION:</span>
+{user_query}
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 12: REASONING ENGINE -->
+<!-- ════════════════════════════════ -->
+<div id="s12" class="section">
+  <div class="section-header">
+    <div class="section-number">12</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Twelve</div>
+      <div class="section-title">Reasoning <em>Engine</em></div>
+    </div>
+  </div>
+
+  <h3>12.1 Signal Fusion Architecture</h3>
+
+  <p>The Reasoning Engine is the intellectual core of EREBUS — it synthesizes quantitative factor scores, NLP-derived signals, and retrieved document evidence into coherent, evidence-backed analytical narratives. It operates as a structured chain of reasoning steps, not a single LLM call.</p>
+
+  <div class="diagram" data-title="Reasoning Engine — Multi-Signal Fusion Chain">
+<span class="diag-gold">   QUANT SIGNALS              NLP SIGNALS               DOC EVIDENCE</span>
+<span class="diag-gold">   ─────────────              ───────────               ────────────</span>
+   α_composite=72            Sentiment=-0.3            Guidance FY25:
+   Quality=85                MCS=61/100                 "NIM: 4.2%-4.4%"
+   Value=54                  NewsFlow=neg              Risk: "NPA rising"
+   Momentum=68               GuidDev=-8.5%             [Annual Report p.67]
+
+         │                        │                           │
+         └────────────────────────┼───────────────────────────┘
+                                  │
+                                  ▼
+<span class="diag-green">         ┌────────────────────────────────────────────────────────────┐</span>
+<span class="diag-green">         │            CONTRADICTION DETECTION LAYER                   │</span>
+<span class="diag-green">         │  Detects: High Quality score BUT negative sentiment         │</span>
+<span class="diag-green">         │  Detects: Positive momentum BUT management guidance cut     │</span>
+<span class="diag-green">         │  Detects: Low risk score BUT NPA rising flag in docs        │</span>
+<span class="diag-green">         │  → Generates: "Signal Divergence Alert" with evidence       │</span>
+<span class="diag-green">         └────────────────────────┬───────────────────────────────────┘</span>
+                                  │
+                                  ▼
+<span class="diag-blue">         ┌────────────────────────────────────────────────────────────┐</span>
+<span class="diag-blue">         │           STRUCTURED NARRATIVE GENERATION                  │</span>
+<span class="diag-blue">         │  Section templates with mandatory evidence slots:           │</span>
+<span class="diag-blue">         │  1. Investment Summary (1 paragraph, quant + qual)         │</span>
+<span class="diag-blue">         │  2. Quality Analysis (factor scores + drivers)             │</span>
+<span class="diag-blue">         │  3. Valuation Assessment (value factor + peer comparison)   │</span>
+<span class="diag-blue">         │  4. Momentum Assessment (price + fundamental momentum)      │</span>
+<span class="diag-blue">         │  5. Risk Diagnostic (all 4 risk dimensions)                │</span>
+<span class="diag-blue">         │  6. Management Credibility (MCS + evidence)                │</span>
+<span class="diag-blue">         │  7. Key Risks and Catalysts                                 │</span>
+<span class="diag-blue">         └────────────────────────┬───────────────────────────────────┘</span>
+                                  │
+                                  ▼
+<span class="diag-purple">         ┌────────────────────────────────────────────────────────────┐</span>
+<span class="diag-purple">         │              CITATION ASSEMBLY & GROUNDING                 │</span>
+<span class="diag-purple">         │  Every claim tagged with source: [Quant Model v2.3] or     │</span>
+<span class="diag-purple">         │  [Annual Report FY24, p.45] or [Q3 Earnings Call, 2024]    │</span>
+<span class="diag-purple">         └────────────────────────────────────────────────────────────┘</span>
+  </div>
+
+  <h3>12.2 Guidance vs Actual Tracking</h3>
+
+  <pre data-label="Python · Guidance Tracker">
+<span class="cm"># reasoning/guidance_tracker.py</span>
+
+<span class="kw">class</span> <span class="fn">GuidanceActualTracker</span>:
+    <span class="str">"""
+    Builds a longitudinal record of management guidance commitments
+    vs subsequent actual outcomes. Core input to MCS computation.
+    """</span>
+
+    <span class="kw">def</span> <span class="fn">build_guidance_record</span>(self, company_id: str) -> GuidanceRecord:
+        <span class="cm"># Retrieve all guidance extractions across doc history</span>
+        guidance_list = self.db.query(
+            <span class="str">"""
+            SELECT ge.* FROM guidance_extractions ge
+            JOIN document_registry dr ON ge.doc_id = dr.doc_id
+            WHERE dr.company_id = %s
+            ORDER BY ge.guidance_for_period
+            """</span>,
+            (company_id,)
+        )
+
+        results = []
+        <span class="kw">for</span> guidance <span class="kw">in</span> guidance_list:
+            <span class="cm"># Find matching actual from financial_snapshots</span>
+            actual = self.db.query_one(
+                <span class="str">"""
+                SELECT {metric} FROM financial_snapshots
+                WHERE company_id = %s AND period_end = %s
+                """</span>.format(metric=guidance.metric_mapped),
+                (company_id, guidance.guidance_for_period_end)
+            )
+
+            <span class="kw">if</span> actual:
+                deviation = (actual.value - guidance.value) / abs(guidance.value)
+                results.append(GuidanceComparison(
+                    metric=guidance.metric_name,
+                    period=guidance.guidance_for_period,
+                    guided_value=guidance.value,
+                    actual_value=actual.value,
+                    deviation_pct=deviation * <span class="num">100</span>,
+                    source_doc=guidance.doc_id,
+                    source_page=guidance.page_number,
+                    source_quote=guidance.raw_text
+                ))
+
+        <span class="kw">return</span> GuidanceRecord(
+            company_id=company_id,
+            comparisons=results,
+            mean_deviation=np.mean([abs(r.deviation_pct) <span class="kw">for</span> r <span class="kw">in</span> results]),
+            direction_accuracy=np.mean([
+                (r.deviation_pct > <span class="num">0</span>) == (guidance.direction == <span class="str">"upward"</span>) 
+                <span class="kw">for</span> r <span class="kw">in</span> results
+            ]),
+            mcs=self._compute_mcs(results)
+        )
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 13: EXPLAINABILITY -->
+<!-- ════════════════════════════════ -->
+<div id="s13" class="section">
+  <div class="section-header">
+    <div class="section-number">13</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Thirteen</div>
+      <div class="section-title">Explainability <em>Layer</em></div>
+    </div>
+  </div>
+
+  <h3>13.1 Factor Score Decomposition</h3>
+
+  <p>Every composite alpha score is accompanied by a full waterfall decomposition showing the contribution of each factor and sub-factor to the final score. This is rendered visually in the dashboard and exported in all report formats.</p>
+
+  <pre data-label="Python · SHAP Integration for LightGBM Ranker">
+<span class="cm"># explainability/shap_explainer.py</span>
+<span class="kw">import</span> shap
+
+<span class="kw">class</span> <span class="fn">FactorExplainer</span>:
+    <span class="str">"""
+    Generates SHAP-based feature importance for ML ranking model outputs.
+    For rule-based factor model: generates analytical attribution using
+    weight × (score − universe_mean) decomposition.
+    """</span>
+
+    <span class="kw">def</span> <span class="fn">explain_ml_rank</span>(self, company_id: str, feature_vector: np.ndarray) -> Explanation:
+        <span class="cm"># TreeExplainer for LightGBM (exact, not approximate)</span>
+        explainer = shap.TreeExplainer(self.lgbm_model)
+        shap_values = explainer.shap_values(feature_vector.reshape(<span class="num">1</span>, -<span class="num">1</span>))
+
+        <span class="kw">return</span> Explanation(
+            company_id=company_id,
+            model_output=self.lgbm_model.predict(feature_vector.reshape(<span class="num">1</span>, -<span class="num">1</span>))[<span class="num">0</span>],
+            base_value=explainer.expected_value,
+            feature_contributions=[
+                FeatureContribution(
+                    feature_name=self.feature_names[i],
+                    raw_value=feature_vector[i],
+                    shap_value=shap_values[<span class="num">0</span>][i],
+                    direction=<span class="str">"positive"</span> <span class="kw">if</span> shap_values[<span class="num">0</span>][i] > <span class="num">0</span> <span class="kw">else</span> <span class="str">"negative"</span>,
+                    percentile_in_universe=self.get_percentile(self.feature_names[i], feature_vector[i])
+                )
+                <span class="kw">for</span> i <span class="kw">in</span> range(len(self.feature_names))
+            ],
+            top_positive_drivers=[...],   <span class="cm"># top 3 factors lifting the score</span>
+            top_negative_drivers=[...],   <span class="cm"># top 3 factors dragging the score</span>
+        )
+
+    <span class="kw">def</span> <span class="fn">explain_factor_score</span>(self, company_id: str, factor: str) -> FactorExplanation:
+        <span class="cm"># Rule-based attribution for transparent factor scores</span>
+        <span class="cm"># Attribution = weight_i × (sub_score_i − universe_median_i)</span>
+        sub_scores = self.get_sub_scores(company_id, factor)
+        universe_medians = self.get_universe_medians(factor)
+        weights = FACTOR_WEIGHTS[factor]
+
+        attributions = {
+            sub: weights[sub] * (sub_scores[sub] - universe_medians[sub])
+            <span class="kw">for</span> sub <span class="kw">in</span> sub_scores
+        }
+
+        <span class="kw">return</span> FactorExplanation(
+            factor=factor,
+            composite_score=sum(weights[s] * sub_scores[s] <span class="kw">for</span> s <span class="kw">in</span> sub_scores),
+            attributions=attributions,
+            interpretation=self._generate_interpretation(attributions, factor)
+        )
+  </pre>
+
+  <h3>13.2 Reasoning Trace Output Format</h3>
+
+  <pre data-label="JSON · Explainability Envelope">
+{
+  "company_id": "HDFCBANK",
+  "report_timestamp": "2024-11-01T14:00:00Z",
+  "model_version": "erebus-v2.3.1",
+  "composite_alpha_score": 71.4,
+  "universe_rank": 8,
+  "universe_size": 50,
+  "factor_scores": {
+    "quality": {
+      "score": 82.1,
+      "percentile": 82,
+      "sub_factors": {
+        "roe": {"value": 0.172, "score": 78, "attribution": +3.2},
+        "roic": {"value": 0.156, "score": 81, "attribution": +2.8},
+        "fcf_conversion": {"value": 0.91, "score": 88, "attribution": +2.4},
+        "accruals_ratio": {"value": -0.023, "score": 85, "attribution": +1.8}
+      },
+      "top_driver": "FCF conversion ratio in 88th percentile vs universe",
+      "risk_flag": null
+    },
+    "value": {
+      "score": 54.3,
+      "percentile": 54,
+      "interpretation": "Fairly valued vs banking peers; EV/EBITDA at median"
+    },
+    "momentum": {
+      "score": 68.0,
+      "percentile": 68,
+      "interpretation": "Strong 12M momentum (+23% vs NIFTY Bank +18%); earnings revision positive"
+    }
+  },
+  "nlp_signals": {
+    "management_credibility_score": 61,
+    "mcs_interpretation": "Moderate credibility: delivered on 6 of 9 guidance metrics over 3 years",
+    "earnings_call_sentiment": -0.12,
+    "sentiment_interpretation": "Slightly cautious tone in Q2 FY25 call; management flagged NPA pressure",
+    "news_sentiment_30d": -0.08
+  },
+  "risk_flags": [
+    {"type": "financial", "signal": "NPA_rising", "severity": "medium", "source": "Annual Report FY24, p.89"},
+    {"type": "regulatory", "signal": "RBI_credit_growth_circular", "severity": "low", "source": "SEBI Filing 2024-09-12"}
+  ],
+  "confidence": {
+    "level": "High",
+    "data_coverage_pct": 96.2,
+    "freshness_days": 2,
+    "document_sources_used": 4
+  }
+}
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 14: VISUALIZATION ENGINE -->
+<!-- ════════════════════════════════ -->
+<div id="s14" class="section">
+  <div class="section-header">
+    <div class="section-number">14</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Fourteen</div>
+      <div class="section-title">Visualization <em>Engine</em></div>
+    </div>
+  </div>
+
+  <h3>14.1 Chart Inventory and Rendering Pipeline</h3>
+
+  <table>
+    <thead><tr><th>Chart Type</th><th>Use Case</th><th>Library</th><th>Export Format</th></tr></thead>
+    <tbody>
+      <tr><td>Universe Heatmap</td><td>NIFTY 50 factor score heatmap (company × factor)</td><td>Plotly (WebGL)</td><td>SVG, PNG, interactive HTML</td></tr>
+      <tr><td>Factor Waterfall</td><td>Composite score decomposition per company</td><td>Plotly bar waterfall</td><td>SVG for PDF embed</td></tr>
+      <tr><td>Time-Series: Financial</td><td>Revenue/EBITDA/PAT trends (5–10Y)</td><td>Plotly line + area</td><td>SVG, PNG</td></tr>
+      <tr><td>Peer Comparison Radar</td><td>Multi-factor peer benchmarking (pentagon chart)</td><td>Plotly polar chart</td><td>SVG for reports</td></tr>
+      <tr><td>Guidance vs Actual Bar</td><td>Metric-by-metric guidance deviation visualization</td><td>Plotly grouped bar</td><td>SVG, PNG</td></tr>
+      <tr><td>Price + Signal Overlay</td><td>Price chart with momentum signal, earnings dates</td><td>Plotly candlestick + scatter</td><td>PNG for reports</td></tr>
+      <tr><td>Risk Scorecard Grid</td><td>Four-quadrant risk dimension grid</td><td>Custom SVG (D3.js)</td><td>SVG</td></tr>
+      <tr><td>SHAP Beeswarm</td><td>Feature importance visualization for ML model</td><td>shap.plots → Matplotlib → SVG</td><td>SVG for reports</td></tr>
+      <tr><td>MCS Timeline</td><td>Guidance accuracy tracking over 3Y</td><td>Plotly scatter + trend</td><td>SVG, PNG</td></tr>
+      <tr><td>Sentiment Timeseries</td><td>News and earnings call sentiment trend</td><td>Plotly area chart</td><td>PNG</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.2 Chart Generation Pipeline</h3>
+
+  <pre data-label="Python · Chart Generation Service">
+<span class="cm"># visualization/chart_service.py</span>
+<span class="kw">import</span> plotly.graph_objects <span class="kw">as</span> go
+<span class="kw">import</span> plotly.io <span class="kw">as</span> pio
+
+<span class="kw">class</span> <span class="fn">ChartGenerationService</span>:
+    <span class="str">"""
+    Generates charts in dual format:
+    - Interactive (Plotly JSON → frontend renders in browser)
+    - Static (SVG/PNG via Kaleido → embedded in PDF reports)
+
+    All charts use the EREBUS design system: institutional color palette,
+    DM Serif Display for titles, consistent grid styling.
+    """</span>
+
+    EREBUS_TEMPLATE = {
+        <span class="str">"layout"</span>: {
+            <span class="str">"font"</span>: {<span class="str">"family"</span>: <span class="str">"Instrument Sans, sans-serif"</span>, <span class="str">"size"</span>: <span class="num">11</span>},
+            <span class="str">"paper_bgcolor"</span>: <span class="str">"#f5f2eb"</span>,
+            <span class="str">"plot_bgcolor"</span>: <span class="str">"#f5f2eb"</span>,
+            <span class="str">"colorway"</span>: [<span class="str">"#1a3a5c"</span>, <span class="str">"#c9a84c"</span>, <span class="str">"#1a6b3c"</span>, <span class="str">"#8b1a1a"</span>, <span class="str">"#4a90d9"</span>],
+            <span class="str">"xaxis"</span>: {<span class="str">"gridcolor"</span>: <span class="str">"#c8bfa8"</span>, <span class="str">"linecolor"</span>: <span class="str">"#0a0a0f"</span>},
+            <span class="str">"yaxis"</span>: {<span class="str">"gridcolor"</span>: <span class="str">"#c8bfa8"</span>, <span class="str">"linecolor"</span>: <span class="str">"#0a0a0f"</span>}
+        }
+    }
+
+    <span class="kw">def</span> <span class="fn">generate_guidance_deviation_chart</span>(
+        self, guidance_record: GuidanceRecord
+    ) -> ChartOutput:
+        comparisons = guidance_record.comparisons
+
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            name=<span class="str">"Guided"</span>,
+            x=[c.metric <span class="kw">for</span> c <span class="kw">in</span> comparisons],
+            y=[c.guided_value <span class="kw">for</span> c <span class="kw">in</span> comparisons],
+            marker_color=<span class="str">"#1a3a5c"</span>
+        ))
+        fig.add_trace(go.Bar(
+            name=<span class="str">"Actual"</span>,
+            x=[c.metric <span class="kw">for</span> c <span class="kw">in</span> comparisons],
+            y=[c.actual_value <span class="kw">for</span> c <span class="kw">in</span> comparisons],
+            marker_color=<span class="str">"#c9a84c"</span>
+        ))
+        fig.update_layout(
+            title=<span class="str">"Management Guidance vs Actual Outcomes"</span>,
+            barmode=<span class="str">"group"</span>,
+            template=self.EREBUS_TEMPLATE
+        )
+
+        <span class="kw">return</span> ChartOutput(
+            interactive_json=fig.to_json(),
+            static_svg=pio.to_image(fig, format=<span class="str">"svg"</span>, engine=<span class="str">"kaleido"</span>),
+            static_png=pio.to_image(fig, format=<span class="str">"png"</span>, width=<span class="num">900</span>, height=<span class="num">450</span>, scale=<span class="num">2</span>)
+        )
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 15: EXPORT SYSTEM -->
+<!-- ════════════════════════════════ -->
+<div id="s15" class="section">
+  <div class="section-header">
+    <div class="section-number">15</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Fifteen</div>
+      <div class="section-title">Export <em>System</em></div>
+    </div>
+  </div>
+
+  <h3>15.1 PDF Report Architecture</h3>
+
+  <p>PDF reports are generated using a template-driven pipeline: Jinja2 populates an HTML template with data, which is then rendered to PDF using WeasyPrint (CSS → PDF, supporting custom fonts and complex layouts). An alternative pipeline uses ReportLab for programmatic chart-heavy reports.</p>
+
+  <div class="pipeline">
+    <div class="pipeline-step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <div class="step-title">Report Data Assembly</div>
+        <div class="step-desc">Collect: company metadata, factor scorecard JSON, explainability envelope, all chart SVGs, NLP analysis sections, guidance comparison table, risk flags with sources, appendix (all citations with page references).</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <div class="step-title">Template Rendering (Jinja2 + HTML/CSS)</div>
+        <div class="step-desc">EREBUS report template renders data into a structured HTML document. Template sections: Cover Page, Executive Summary, Factor Scorecard (with waterfall chart), Financial Analysis, Qualitative Insights, Risk Diagnostic, Management Credibility, Peer Comparison, Citation Appendix.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <div class="step-title">PDF Generation (WeasyPrint)</div>
+        <div class="step-desc">WeasyPrint converts the HTML/CSS to PDF with: custom fonts (DM Serif Display, JetBrains Mono), precise page layout, running headers/footers, page numbers, automated table of contents via CSS counters. Output is a print-quality PDF.</div>
+      </div>
+    </div>
+    <div class="pipeline-step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <div class="step-title">PDF Metadata and Delivery</div>
+        <div class="step-desc">PDF is watermarked with: firm name, user ID, generation timestamp, report UUID, classification level. Stored in S3 with presigned URL generated for secure download. Link expires in 24 hours. Report UUID registered in audit log.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>15.2 Excel Export Pipeline</h3>
+
+  <pre data-label="Python · Excel Report Builder">
+<span class="cm"># export/excel_builder.py</span>
+<span class="kw">import</span> openpyxl
+<span class="kw">from</span> openpyxl.styles <span class="kw">import</span> Font, PatternFill, Alignment, Border, Side
+<span class="kw">from</span> openpyxl.chart <span class="kw">import</span> BarChart
+
+<span class="kw">class</span> <span class="fn">ExcelReportBuilder</span>:
+    <span class="str">"""
+    Generates multi-sheet Excel workbooks for institutional users.
+    Sheet structure designed for direct import into portfolio optimization tools.
+    """</span>
+
+    SHEET_STRUCTURE = {
+        <span class="str">"Universe_Scorecard"</span>: <span class="str">"Full NIFTY50 ranking with all factor scores"</span>,
+        <span class="str">"Factor_Data"</span>: <span class="str">"Raw normalized factor values, pre-winsorization"</span>,
+        <span class="str">"Financial_History"</span>: <span class="str">"10-year financial time series for selected companies"</span>,
+        <span class="str">"Guidance_Tracking"</span>: <span class="str">"Guidance vs actual comparison table"</span>,
+        <span class="str">"Risk_Flags"</span>: <span class="str">"All risk signals with source citations"</span>,
+        <span class="str">"Model_Metadata"</span>: <span class="str">"Model version, weights, computation timestamp, data vintage"</span>
+    }
+
+    <span class="kw">def</span> <span class="fn">build_universe_scorecard_sheet</span>(self, ws, scores: list[CompanyScore]):
+        <span class="cm"># Header row — institutional styling</span>
+        headers = [<span class="str">"Rank"</span>, <span class="str">"Ticker"</span>, <span class="str">"Company"</span>, <span class="str">"Sector"</span>,
+                   <span class="str">"Composite α"</span>, <span class="str">"Quality"</span>, <span class="str">"Value"</span>, <span class="str">"Momentum"</span>,
+                   <span class="str">"Risk"</span>, <span class="str">"NLP"</span>, <span class="str">"MCS"</span>, <span class="str">"Data Quality"</span>, <span class="str">"Confidence"</span>]
+
+        header_fill = PatternFill(<span class="str">"solid"</span>, fgColor=<span class="str">"0A0A0F"</span>)
+        header_font = Font(color=<span class="str">"C9A84C"</span>, bold=<span class="kw">True</span>, name=<span class="str">"Calibri"</span>, size=<span class="num">10</span>)
+
+        <span class="kw">for</span> col, header <span class="kw">in</span> enumerate(headers, <span class="num">1</span>):
+            cell = ws.cell(row=<span class="num">1</span>, column=col, value=header)
+            cell.fill = header_fill
+            cell.font = header_font
+            cell.alignment = Alignment(horizontal=<span class="str">"center"</span>)
+
+        <span class="cm"># Conditional formatting: top quintile green, bottom quintile red</span>
+        <span class="kw">from</span> openpyxl.formatting.rule <span class="kw">import</span> ColorScaleRule
+        ws.conditional_formatting.add(
+            <span class="str">'E2:E51'</span>,  <span class="cm"># Composite alpha column</span>
+            ColorScaleRule(
+                start_type=<span class="str">'min'</span>, start_color=<span class="str">'8B1A1A'</span>,
+                mid_type=<span class="str">'percentile'</span>, mid_value=<span class="num">50</span>, mid_color=<span class="str">'F5F2EB'</span>,
+                end_type=<span class="str">'max'</span>, end_color=<span class="str">'1A6B3C'</span>
+            )
+        )
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 16: API DESIGN -->
+<!-- ════════════════════════════════ -->
+<div id="s16" class="section">
+  <div class="section-header">
+    <div class="section-number">16</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Sixteen</div>
+      <div class="section-title">API <em>Design</em></div>
+    </div>
+  </div>
+
+  <h3>16.1 Core Endpoints</h3>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-get">GET</span>
+      <span class="endpoint-path">/api/v1/universe/{universe_id}/scorecard</span>
+    </div>
+    <div class="endpoint-desc">Returns full ranked scorecard for specified universe (e.g., NIFTY50). Served from pre-computed feature store. Headers: <code>X-EREBUS-Model-Version</code>, <code>X-Data-Vintage-Timestamp</code>.<br><strong>Query params:</strong> <code>sector_filter</code>, <code>min_quality_score</code>, <code>sort_by</code>, <code>include_explainability</code><br><strong>Response:</strong> Array of CompanyScore objects with rank, factor scores, confidence band, data quality flags.</div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-get">GET</span>
+      <span class="endpoint-path">/api/v1/companies/{company_id}/signal</span>
+    </div>
+    <div class="endpoint-desc">Returns current signal card for a single company: composite score, factor breakdown, top drivers, risk flags, NLP sentiment. Served from cache (Redis TTL 5 min). Latency target: ≤ 200ms.<br><strong>Query params:</strong> <code>include_explainability</code>, <code>include_nlp</code>, <code>include_guidance</code></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-post">POST</span>
+      <span class="endpoint-path">/api/v1/research/sessions</span>
+    </div>
+    <div class="endpoint-desc">Initiates a Deep Research Mode session. Returns a <code>session_id</code> and <code>upload_urls</code> (presigned S3 URLs for document upload). Begins background processing immediately.<br><strong>Body:</strong> <code>{company_id, company_name, time_horizon_years, analysis_sections}</code><br><strong>Response:</strong> <code>{session_id, upload_urls, estimated_completion_seconds, websocket_url}</code></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-post">POST</span>
+      <span class="endpoint-path">/api/v1/research/sessions/{session_id}/query</span>
+    </div>
+    <div class="endpoint-desc">Natural language query against an active research session. Retrieves from session-scoped vector index + company financial DB. Returns grounded answer with citations.<br><strong>Body:</strong> <code>{question, require_citations: true}</code><br><strong>Response:</strong> <code>{answer, citations[], confidence, insufficient_data_reason}</code></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-post">POST</span>
+      <span class="endpoint-path">/api/v1/research/sessions/{session_id}/report</span>
+    </div>
+    <div class="endpoint-desc">Triggers full report generation from session data. Async — returns <code>job_id</code>. Use WebSocket or polling to monitor progress. Report assembled from all analysis sections, charts generated, PDF compiled.<br><strong>Body:</strong> <code>{format: "pdf"|"excel"|"json", sections: [...], include_citations: true}</code></div>
+  </div>
+
+  <div class="endpoint">
+    <div class="endpoint-header">
+      <span class="method method-get">GET</span>
+      <span class="endpoint-path">/api/v1/companies/{company_id}/guidance-tracker</span>
+    </div>
+    <div class="endpoint-desc">Returns the full guidance vs actual history for a company, including MCS score, per-metric deviation statistics, and source citations for every guidance extraction.<br><strong>Response:</strong> <code>GuidanceRecord</code> with MCS, comparisons[], trend analysis.</div>
+  </div>
+
+  <h3>16.2 WebSocket Protocol — Real-Time Progress Streaming</h3>
+
+  <pre data-label="JSON · WebSocket Message Schema">
+<span class="cm">// ws://api.erebus.internal/research/sessions/{session_id}/stream</span>
+{
+  "message_type": "progress_update",
+  "session_id": "3f8a...",
+  "timestamp": "2024-11-01T14:23:45Z",
+  "stage": "document_indexing",
+  "stage_progress_pct": 65,
+  "overall_progress_pct": 28,
+  "stages": {
+    "file_ingestion": {"status": "complete", "duration_ms": 1240},
+    "pdf_parsing": {"status": "complete", "duration_ms": 8340, "pages": 342, "chunks": 286},
+    "document_indexing": {"status": "in_progress", "vectors_embedded": 186, "total": 286},
+    "financial_analysis": {"status": "pending"},
+    "nlp_pipeline": {"status": "pending"},
+    "report_generation": {"status": "pending"}
+  },
+  "message": "Embedding chunks 186/286 from Annual Report FY24"
+}
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 17: FRONTEND -->
+<!-- ════════════════════════════════ -->
+<div id="s17" class="section">
+  <div class="section-header">
+    <div class="section-number">17</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Seventeen</div>
+      <div class="section-title">Frontend <em>Architecture</em></div>
+    </div>
+  </div>
+
+  <h3>17.1 Technology Stack</h3>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Framework</span><span class="spec-val">React 18 + TypeScript. Server-Side Rendering (Next.js 14) for initial page load performance. App Router for session-scoped layouts.</span></div>
+    <div class="spec-row"><span class="spec-key">State Management</span><span class="spec-val">TanStack Query (React Query v5) for server state (auto-revalidation, optimistic updates). Zustand for local UI state (filters, sidebar state).</span></div>
+    <div class="spec-row"><span class="spec-key">Data Visualization</span><span class="spec-val">Plotly.js (WebGL for heatmaps, interactive time-series). D3.js for custom SVG elements (radar charts, waterfall decompositions). Recharts for sparklines.</span></div>
+    <div class="spec-row"><span class="spec-key">Real-Time Updates</span><span class="spec-val">WebSocket (native browser API) for research session progress streaming. EventSource (SSE) for live score refreshes during market hours.</span></div>
+    <div class="spec-row"><span class="spec-key">File Upload</span><span class="spec-val">Direct-to-S3 multipart upload via presigned URLs. react-dropzone for drag-and-drop. Chunked upload for large PDFs (>50MB) with resumable upload protocol.</span></div>
+    <div class="spec-row"><span class="spec-key">Design System</span><span class="spec-val">Custom component library (Radix UI primitives + EREBUS tokens). Institutional color palette, DM Serif Display display font, JetBrains Mono for data. Storybook documentation.</span></div>
+    <div class="spec-row"><span class="spec-key">Accessibility</span><span class="spec-val">WCAG 2.1 AA compliance. Full keyboard navigation. Screen reader annotations for all charts (aria-label with data summary).</span></div>
+  </div>
+
+  <h3>17.2 Dashboard Layout Architecture</h3>
+
+  <div class="diagram" data-title="Dashboard Layout — Normal Mode View">
+<span class="diag-gold">┌──────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="diag-gold">│  EREBUS                              NIFTY 50 · Live · 14:23 IST  [User ▼]  │</span>
+<span class="diag-gold">├──────────────────────────────────────────────────────────────────────────────┤</span>
+<span class="diag-muted">│  [Normal Mode ●]  [Deep Research]              [Export ↓]  [Refresh ↺]       │</span>
+<span class="diag-muted">├───────────────────────────────────────────────────────────────────────────────┤</span>
+│                                                                               │
+│  <span class="diag-blue">UNIVERSE FILTER BAR:</span>  Sector [All ▼]  Quality [>50] Value [All] Sort [α Comp ▼]│
+│                                                                               │
+│  <span class="diag-green">┌── FACTOR HEATMAP (50×5 grid) ─────────────────────────────────────────────┐</span> │
+│  <span class="diag-green">│  Company  │ Quality │ Value │ Momentum │ Risk │  α Composite │ Rank       │</span> │
+│  <span class="diag-green">│  HDFCBANK │   ████  │  ███  │   ████   │  ██  │    ██████    │   #8       │</span> │
+│  <span class="diag-green">│  INFY     │   ████  │  ██   │   █████  │  ██  │    █████     │   #11      │</span> │
+│  <span class="diag-green">│  ...      │  [color-coded: green=high, red=low]                │           │</span> │
+│  <span class="diag-green">└────────────────────────────────────────────────────────────────────────────┘</span> │
+│                                                                               │
+│  <span class="diag-purple">┌── SIGNAL PANEL (selected company) ────────────┐  ┌─ SECTOR BREAKDOWN ─────┐</span> │
+│  <span class="diag-purple">│  HDFC Bank Limited  HDFCBANK.NS              │  │  [Donut chart]          │</span> │
+│  <span class="diag-purple">│  α Score: 71.4  │  Rank: #8 of 50           │  │  Financials: 8 cos      │</span> │
+│  <span class="diag-purple">│  ─────────────────────────────────────────   │  │  IT: 7 cos              │</span> │
+│  <span class="diag-purple">│  Quality ████████████████░░ 82               │  │  Consumer: 6 cos        │</span> │
+│  <span class="diag-purple">│  Value   ████████████░░░░░░ 54               │  └────────────────────────┘</span> │
+│  <span class="diag-purple">│  Momentum██████████████░░░░ 68               │                             │</span> │
+│  <span class="diag-purple">│  Risk    ███░░░░░░░░░░░░░░░ 31 ⚠            │  ┌─ MOMENTUM LEADERS ──────┐</span> │
+│  <span class="diag-purple">│  ─────────────────────────────────────────   │  │  #1 TITAN    +31% 12M   │</span> │
+│  <span class="diag-purple">│  [→ Deep Research]  [↓ Export]               │  │  #2 BAJFINANCE +28%     │</span> │
+│  <span class="diag-purple">└────────────────────────────────────────────── └────────────────────────────┘</span> │
+└──────────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 18: PERFORMANCE -->
+<!-- ════════════════════════════════ -->
+<div id="s18" class="section">
+  <div class="section-header">
+    <div class="section-number">18</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Eighteen</div>
+      <div class="section-title">Performance &amp; <em>Scalability</em></div>
+    </div>
+  </div>
+
+  <h3>18.1 Caching Strategy</h3>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">L1 Cache · Browser</div>
+      <div class="card-title">In-Memory (React Query)</div>
+      <div class="card-body">Universe scorecard cached in React Query for 5 minutes. Single company signals: 2 minutes. Prevents redundant API calls. Stale-while-revalidate pattern for seamless UX.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">L2 Cache · Edge</div>
+      <div class="card-title">CDN (CloudFront)</div>
+      <div class="card-body">Static chart images (SVG/PNG) for closed-market hours cached at CDN edge. Cache-Control headers set per data type. Market hours: max-age=0, stale-while-revalidate=300.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">L3 Cache · Server</div>
+      <div class="card-title">Redis Cluster</div>
+      <div class="card-body">Pre-computed feature store scores (TTL: 5min market hours). Session state. Rate limit counters. Report generation status. Read throughput: >100K ops/sec with Redis Cluster (6 shards).</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Pre-Computation</div>
+      <div class="card-title">Scheduled Batch Jobs</div>
+      <div class="card-body">Universe-wide factor scores recomputed every 15 minutes (market hours) and on-demand. Celery Beat scheduler. Results pushed to Redis. No cold-path computation on user request.</div>
+    </div>
+  </div>
+
+  <h3>18.2 Latency Optimization — Normal Mode</h3>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Database Indexing</span><span class="spec-val">Composite index on <code>(company_id, computed_at DESC, model_version)</code> in feature_store. TimescaleDB chunk indexing on time dimension. Query plan analyzed quarterly.</span></div>
+    <div class="spec-row"><span class="spec-key">Connection Pooling</span><span class="spec-val">PgBouncer for PostgreSQL (pool size: 50, transaction-level pooling). Reduces connection overhead from FastAPI worker pool.</span></div>
+    <div class="spec-row"><span class="spec-key">Response Compression</span><span class="spec-val">Brotli compression on all JSON responses > 1KB. Chart SVGs compressed with SVGO before delivery. Reduces payload size 60–80%.</span></div>
+    <div class="spec-row"><span class="spec-key">Async I/O</span><span class="spec-val">All database and external service calls are async (asyncpg + httpx). FastAPI runs on uvicorn with uvloop. Zero blocking I/O in the hot path.</span></div>
+  </div>
+
+  <h3>18.3 Deep Research Mode — Parallelization</h3>
+
+  <pre data-label="Python · Parallel Deep Research Pipeline">
+<span class="cm"># orchestration/deep_research_orchestrator.py</span>
+<span class="kw">import</span> asyncio
+
+<span class="kw">async def</span> <span class="fn">run_deep_research</span>(session: ResearchSession) -> ResearchResult:
+    <span class="str">"""
+    Parallelizes independent analysis steps to minimize total wall-clock time.
+    Document indexing, financial computation, and news retrieval run concurrently.
+    """</span>
+    <span class="cm"># Step 1: File ingestion must complete first (sequential)</span>
+    ingestion_results = <span class="kw">await</span> ingest_uploaded_files(session.uploaded_files)
+
+    <span class="cm"># Step 2: Run independent pipelines in parallel</span>
+    quant_task = asyncio.create_task(compute_financial_analysis(session.company_id))
+    index_task = asyncio.create_task(index_documents(ingestion_results))
+    news_task  = asyncio.create_task(retrieve_news_intelligence(session.company_id))
+    peer_task  = asyncio.create_task(compute_peer_benchmarking(session.company_id))
+
+    <span class="cm"># Broadcast progress via WebSocket as tasks complete</span>
+    quant_result, index_result, news_result, peer_result = <span class="kw">await</span> asyncio.gather(
+        quant_task, index_task, news_task, peer_task,
+        return_exceptions=<span class="kw">True</span>  <span class="cm"># don't fail all if one step fails</span>
+    )
+
+    <span class="cm"># Step 3: Reasoning engine (sequential — requires all step 2 outputs)</span>
+    reasoning_result = <span class="kw">await</span> run_reasoning_engine(
+        quant=quant_result,
+        documents=index_result,
+        news=news_result,
+        peers=peer_result,
+        session=session
+    )
+
+    <span class="cm"># Step 4: Report generation (sequential — requires reasoning output)</span>
+    report = <span class="kw">await</span> generate_report(reasoning_result, session.report_config)
+
+    <span class="kw">return</span> ResearchResult(session_id=session.session_id, report=report)
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 19: RELIABILITY & SAFETY -->
+<!-- ════════════════════════════════ -->
+<div id="s19" class="section">
+  <div class="section-header">
+    <div class="section-number">19</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Nineteen</div>
+      <div class="section-title">Reliability &amp; <em>Safety</em></div>
+    </div>
+  </div>
+
+  <h3>19.1 Handling Missing and Inconsistent Data</h3>
+
+  <table>
+    <thead><tr><th>Scenario</th><th>Detection</th><th>Handling Strategy</th><th>User Communication</th></tr></thead>
+    <tbody>
+      <tr><td>Missing financial period</td><td>Gap detection in time series query</td><td>Impute from vendor fallback API; if unavailable, exclude from multi-period calculations and flag</td><td>⚠ Data coverage badge shows <100%; tooltip explains missing period</td></tr>
+      <tr><td>Contradictory financials</td><td>Cross-validation: Net Income ≠ Revenue − Expenses (within tolerance)</td><td>Flag both values; use most recent filing; alert data team</td><td>⚠ "Data inconsistency detected" flag on affected metrics</td></tr>
+      <tr><td>Stale price data (feed outage)</td><td>Price data age > 15 min during market hours</td><td>Serve cached data; mark as stale; disable live-dependent features</td><td>🕐 "Price data delayed" banner; timestamp shown</td></tr>
+      <tr><td>Low OCR confidence</td><td>Mean OCR confidence < 85% on a document region</td><td>Mark affected chunks with low_confidence=True; exclude from automated analysis; flag for human review</td><td>⚠ "Document quality warning" with affected pages listed</td></tr>
+      <tr><td>No guidance found in documents</td><td>Zero guidance extractions from all indexed documents</td><td>Set MCS = null (not 0); skip guidance analysis section; note in report</td><td>ℹ "No verifiable guidance found in uploaded documents"</td></tr>
+    </tbody>
+  </table>
+
+  <h3>19.2 Confidence Scoring System</h3>
+
+  <div class="equation">
+    <div class="equation-label">Confidence Band Computation</div>
+    <div>
+      Confidence(company) = f(DataCoverage, DataFreshness, SourceAuthority, CrossSourceConsistency)<br><br>
+      DataCoverage = (features_available / total_features) × 100<br>
+      DataFreshness = max(0, 1 − days_since_filing / 90)<br>
+      SourceAuthority = weighted_mean(source_authority_scores)<br>
+      CrossSourceConsistency = 1 − normalized_std(metric_across_sources)<br><br>
+      Confidence_Band: H if all components > 0.8, M if all > 0.5, L otherwise
+    </div>
+  </div>
+
+  <h3>19.3 Refusal Logic</h3>
+
+  <pre data-label="Python · Refusal Policy Engine">
+<span class="cm"># safety/refusal_engine.py</span>
+
+REFUSAL_THRESHOLDS = {
+    <span class="str">"min_data_coverage"</span>: <span class="num">0.60</span>,   <span class="cm"># Refuse ranking if < 60% features available</span>
+    <span class="str">"min_rag_relevance"</span>: <span class="num">0.65</span>,   <span class="cm"># Refuse RAG answer if best chunk score < 0.65</span>
+    <span class="str">"min_faithfulness"</span>: <span class="num">0.70</span>,    <span class="cm"># Quarantine if NLI faithfulness < 0.70</span>
+    <span class="str">"max_data_staleness_days"</span>: <span class="num">45</span>  <span class="cm"># Warn if fundamental data > 45 days old</span>
+}
+
+<span class="kw">class</span> <span class="fn">RefusalEngine</span>:
+    <span class="kw">def</span> <span class="fn">evaluate_rag_response</span>(self, response: LLMResponse, 
+                                  retrieved_chunks: list[Chunk]) -> RefusalDecision:
+        <span class="cm"># Check 1: Retrieval relevance threshold</span>
+        max_relevance = max(chunk.relevance_score <span class="kw">for</span> chunk <span class="kw">in</span> retrieved_chunks)
+        <span class="kw">if</span> max_relevance < REFUSAL_THRESHOLDS[<span class="str">"min_rag_relevance"</span>]:
+            <span class="kw">return</span> RefusalDecision(
+                should_refuse=<span class="kw">True</span>,
+                reason=<span class="str">"INSUFFICIENT_DATA"</span>,
+                message=<span class="str">f"No document chunk with sufficient relevance found (max score: {max_relevance:.2f}). "</span>
+                        <span class="str">"To answer this question, please upload: [specific document type]."</span>
+            )
+
+        <span class="cm"># Check 2: Faithfulness score (NLI cross-encoder)</span>
+        faithfulness = self.faithfulness_scorer.score(response.text, retrieved_chunks)
+        <span class="kw">if</span> faithfulness < REFUSAL_THRESHOLDS[<span class="str">"min_faithfulness"</span>]:
+            <span class="kw">return</span> RefusalDecision(
+                should_refuse=<span class="kw">True</span>,
+                reason=<span class="str">"LOW_FAITHFULNESS"</span>,
+                message=<span class="str">"Response faithfulness below threshold. Quarantined for review."</span>
+            )
+
+        <span class="cm"># Check 3: Numerical cross-verification</span>
+        numbers_in_response = extract_numbers(response.text)
+        <span class="kw">for</span> num, context <span class="kw">in</span> numbers_in_response:
+            <span class="kw">if not</span> self._verify_number_in_context(num, retrieved_chunks):
+                response.add_warning(f<span class="str">"Unverified number: {num} in context: '{context}'"</span>)
+
+        <span class="kw">return</span> RefusalDecision(should_refuse=<span class="kw">False</span>)
+  </pre>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 20: DEPLOYMENT -->
+<!-- ════════════════════════════════ -->
+<div id="s20" class="section">
+  <div class="section-header">
+    <div class="section-number">20</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Twenty</div>
+      <div class="section-title">Deployment <em>Architecture</em></div>
+    </div>
+  </div>
+
+  <h3>20.1 Cloud Infrastructure (AWS)</h3>
+
+  <div class="diagram" data-title="AWS Deployment Architecture">
+<span class="diag-muted">┌──────────────────── AWS REGION: ap-south-1 (Mumbai) ─────────────────────────┐</span>
+│                                                                                │
+│  <span class="diag-gold">┌── PUBLIC SUBNET ────────────────────────────────────────────────────────┐</span>   │
+│  <span class="diag-gold">│  Route 53 (DNS)  →  CloudFront CDN  →  ALB (Application Load Balancer)│</span>   │
+│  <span class="diag-gold">│  ACM TLS Cert       WAF (DDoS/SQL)      HTTPS → EKS Ingress            │</span>   │
+│  <span class="diag-gold">└────────────────────────────────────────────────────────────────────────┘</span>   │
+│                                   │                                            │
+│  <span class="diag-blue">┌── PRIVATE SUBNET A (App Tier) ──────────────────────────────────────────┐</span>   │
+│  <span class="diag-blue">│  EKS Node Group (c6i.2xlarge × 4 min, autoscale to 12)                 │</span>   │
+│  <span class="diag-blue">│  ┌──────────────────┐  ┌──────────────────┐  ┌─────────────────────┐  │</span>   │
+│  <span class="diag-blue">│  │ API Service       │  │ Normal Mode Svc  │  │ Deep Research Svc   │  │</span>   │
+│  <span class="diag-blue">│  │ (FastAPI, 4 pods) │  │ (FastAPI, 2 pods)│  │ (FastAPI, 2 pods)   │  │</span>   │
+│  <span class="diag-blue">│  └──────────────────┘  └──────────────────┘  └─────────────────────┘  │</span>   │
+│  <span class="diag-blue">│  ┌──────────────────────────────────────────────────────────────────┐  │</span>   │
+│  <span class="diag-blue">│  │  Celery Workers (g4dn.xlarge × 2) — GPU for embedding + NLP     │  │</span>   │
+│  <span class="diag-blue">│  └──────────────────────────────────────────────────────────────────┘  │</span>   │
+│  <span class="diag-blue">└────────────────────────────────────────────────────────────────────────┘</span>   │
+│                                   │                                            │
+│  <span class="diag-green">┌── PRIVATE SUBNET B (Data Tier) ─────────────────────────────────────────┐</span>   │
+│  <span class="diag-green">│  RDS (TimescaleDB)       ElastiCache Redis    Qdrant (EC2 r6i.2xlarge)  │</span>   │
+│  <span class="diag-green">│  Multi-AZ, r6g.2xlarge   Cluster, r7g.large  3-node cluster, NVMe      │</span>   │
+│  <span class="diag-green">│  100GB SSD, daily backup  6-shard, 3-replica  Persistent volumes        │</span>   │
+│  <span class="diag-green">└────────────────────────────────────────────────────────────────────────┘</span>   │
+│                                                                                │
+│  <span class="diag-purple">S3 Buckets:  erebus-data-lake (glacier archival)  erebus-reports  erebus-models</span>│
+│  <span class="diag-purple">Secrets:     AWS Secrets Manager + HashiCorp Vault (API keys, DB credentials)</span>  │
+│  <span class="diag-purple">Monitoring:  Datadog APM + CloudWatch + PagerDuty (on-call alerting)            </span>│
+└──────────────────────────────────────────────────────────────────────────────┘
+  </div>
+
+  <h3>20.2 CI/CD Pipeline</h3>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Source Control</span><span class="spec-val">GitHub Enterprise with branch protection rules. Main branch requires 2 approvals + passing CI.</span></div>
+    <div class="spec-row"><span class="spec-key">CI Pipeline</span><span class="spec-val">GitHub Actions: lint (ruff, mypy), unit tests (pytest, 90%+ coverage), integration tests (docker-compose), security scan (Bandit, Trivy for container images).</span></div>
+    <div class="spec-row"><span class="spec-key">CD Pipeline</span><span class="spec-val">ArgoCD GitOps: Helm charts in separate infra repo. Merge to main → automatic staging deploy. Production deploy: manual approval gate with canary (10% traffic) before full rollout.</span></div>
+    <div class="spec-row"><span class="spec-key">Model Deployment</span><span class="spec-val">ML models versioned in MLflow. Deployment requires: passing offline validation metrics, A/B test approval (IC comparison vs incumbent model), 1-week canary period.</span></div>
+    <div class="spec-row"><span class="spec-key">Rollback</span><span class="spec-val">One-click rollback to previous Helm release. Stateless services rollback in < 2 minutes. Database schema changes are backward-compatible (Liquibase migrations, never destructive).</span></div>
+  </div>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 21: DEMONSTRATION FLOW -->
+<!-- ════════════════════════════════ -->
+<div id="s21" class="section">
+  <div class="section-header">
+    <div class="section-number">21</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Twenty-One</div>
+      <div class="section-title">Client Demonstration <em>Flow</em></div>
+    </div>
+  </div>
+
+  <div class="callout callout-insight">
+    <div class="callout-label">Demonstration Objective</div>
+    <p>The demonstration is designed to build credibility through three escalating "aha moments": (1) the speed and breadth of Normal Mode, (2) the depth and grounding of Deep Research Mode, and (3) the explainability and institutional rigour of the output artifacts. Never lead with features — lead with the intelligence value delivered.</p>
+  </div>
+
+  <h3>21.1 Act One — Market Intelligence Snapshot (3 minutes)</h3>
+  <p><strong>Scenario:</strong> "Let's say it's Monday morning. Your fund manager asks: what's the quality-adjusted view of the NIFTY 50 right now?"</p>
+  <p>Open the dashboard. The universe scorecard loads instantly (< 200ms from cache). Filter to Quality Score > 70. Sort by composite alpha. The top 10 names are immediately visible with full factor breakdowns. Click on HDFC Bank — the signal card opens with a waterfall decomposition showing exactly why it ranks #8: FCF conversion in 88th percentile, but value score dragging it down from top-5. The client sees not a ranking but a reasoning.</p>
+
+  <h3>21.2 Act Two — Deep Research Demonstration (8 minutes)</h3>
+  <p><strong>Scenario:</strong> "Now let's say you've uploaded the HDFC Bank FY24 Annual Report. We've already processed it."</p>
+  <p>Enter Deep Research Mode for HDFC Bank. The analysis is available — show that 286 chunks were indexed, 47 tables extracted. Ask the natural language question: <em>"What has management guided for NIM in FY25, and how credible is that guidance based on their historical track record?"</em></p>
+  <p>The system returns in < 10 seconds: Management guided NIM of 4.2–4.4% for FY25 [Source: Annual Report FY24, p.67, MD&A section]. Historical MCS analysis: management delivered on NIM guidance in 4 of 6 previous periods; mean deviation of +18bps. MCS for NIM-specific guidance: 64/100. The guidance is <em>moderately credible</em> with historical positive bias. The client sees evidence, not assertion.</p>
+
+  <h3>21.3 Act Three — Report Export (2 minutes)</h3>
+  <p>Click "Generate Report." Show the PDF generating in real-time (progress bar via WebSocket). The 18-page report includes: executive summary, factor scorecard with waterfall chart, 5-year financial trend charts, the guidance vs actual table with source citations, risk diagnostic, management credibility analysis, and a full citation appendix with document, page, and section for every claim. Export also as Excel — the structured data is immediately importable into their portfolio optimizer. This is the moment: the report looks like it took an analyst 2 days. It took EREBUS 90 seconds.</p>
+
+</div>
+
+<!-- ════════════════════════════════ -->
+<!-- SECTION 22: FUTURE EXTENSIONS -->
+<!-- ════════════════════════════════ -->
+<div id="s22" class="section">
+  <div class="section-header">
+    <div class="section-number">22</div>
+    <div class="section-title-block">
+      <div class="section-label">Section Twenty-Two</div>
+      <div class="section-title">Future <em>Extensions</em></div>
+    </div>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-label">Extension 01 · V1.5</div>
+      <div class="card-title">Cross-Company Intelligence Graph</div>
+      <div class="card-body">Knowledge graph linking companies via supply chain relationships, customer dependencies, management personnel networks, and shared regulatory exposures. Enables contagion risk analysis: "If TCS's top 3 clients face credit stress, what is the revenue-at-risk?"</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Extension 02 · V1.5</div>
+      <div class="card-title">Sector-Wide Thematic Analytics</div>
+      <div class="card-body">Cross-sectional theme extraction from all indexed documents across a sector. Identifies common risk themes, consensus guidance signals, and management language shifts. "What are CFOs across the banking sector saying about credit costs for FY26?"</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Extension 03 · V2.0</div>
+      <div class="card-title">Anomaly Detection & Early Warning</div>
+      <div class="card-body">Real-time monitoring of factor score deviations, unusual document language patterns (sudden risk language increase), governance red flags (promoter pledge increases, auditor changes). Proactive alerts via email/Slack integration.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Extension 04 · V2.0</div>
+      <div class="card-title">Predictive Earnings Intelligence</div>
+      <div class="card-body">ML model predicting earnings beat/miss probability 30–60 days before announcement, combining: factor trends, management sentiment trajectory, supply chain leading indicators, analyst revision momentum. Output includes confidence interval and key risk scenarios.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Extension 05 · V2.5</div>
+      <div class="card-title">Portfolio-Level Risk Attribution</div>
+      <div class="card-body">Extends factor model to portfolio level: factor exposure attribution (how much of portfolio return is explained by Quality, Value, Momentum factors), portfolio-level risk decomposition, concentration monitoring, and factor tilt reports.</div>
+    </div>
+    <div class="card">
+      <div class="card-label">Extension 06 · V2.5</div>
+      <div class="card-title">Multi-Language Support</div>
+      <div class="card-body">Extend document ingestion to Hindi, Tamil, and Telugu financial documents. Multi-lingual embedding models (multilingual-e5-large) for regional-language SEBI filings, vernacular news sources, and management commentary in regional languages.</div>
+    </div>
+  </div>
+
+  <h3>22.1 Technology Evolution Roadmap</h3>
+
+  <table>
+    <thead><tr><th>Version</th><th>Key Capability Addition</th><th>Technical Dependency</th><th>ETA</th></tr></thead>
+    <tbody>
+      <tr><td>V1.1</td><td>Audio transcription pipeline for earnings calls (real-time audio → transcript → analysis)</td><td>AWS Transcribe Medical (Indian English model), streaming ASR pipeline</td><td>Q3 2025</td></tr>
+      <tr><td>V1.2</td><td>Collaborative research — multiple analysts sharing sessions, annotations, and comments</td><td>CRDT-based collaborative state (Yjs), WebSocket presence</td><td>Q4 2025</td></tr>
+      <tr><td>V1.5</td><td>Knowledge graph (company relationships, supply chain)</td><td>Neo4j AuraDB, graph RAG, entity linking pipeline</td><td>Q1 2026</td></tr>
+      <tr><td>V2.0</td><td>Agentic research (autonomous research sessions with tool use)</td><td>LLM function calling, REACT-style agent loop, human-in-the-loop approval gates</td><td>Q3 2026</td></tr>
+      <tr><td>V2.5</td><td>On-premise / VPC-only deployment option for highest-security institutional clients</td><td>Open-source LLM (Llama 3.1 70B on A100), local embedding model, no external API dependencies</td><td>Q4 2026</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-label">Closing Design Note</div>
+    <p>EREBUS is designed not merely to accelerate research but to <em>elevate its epistemic quality</em>. Every architectural decision — from the refusal logic to the SHAP explainability layer to the guidance credibility tracker — reflects a single belief: that institutional-grade intelligence must be earned through rigor, not granted through confidence. The system is only as good as the discipline of its grounding. That discipline is the product.</p>
+  </div>
+
+</div>
+
+</div><!-- /content -->
+
+<!-- ══════════════════════════════════════════════════════════════ -->
+<!-- FOOTER -->
+<!-- ══════════════════════════════════════════════════════════════ -->
+<div class="doc-footer">
+  <div>EREBUS Platform Architecture Specification v1.0.0 · 22 Sections · Internal Document</div>
+  <div>
+    <span class="classification-badge">RESTRICTED — DO NOT DISTRIBUTE</span>
+  </div>
+  <div>© [FIRM NAME REDACTED] · All Rights Reserved</div>
+</div>
+
+</body>
+</html>

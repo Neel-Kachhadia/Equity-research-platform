@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EREBUS — Final Model Stack v2 | PS2 Equity Research AI Agent</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=JetBrains+Mono:wght@300;400;500;700&family=Instrument+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --ink: #0a0a0f;
+    --paper: #f5f2eb;
+    --cream: #ede8de;
+    --gold: #c9a84c;
+    --gold-light: #e8d08a;
+    --gold-dim: #8a6e2f;
+    --accent: #1a3a5c;
+    --accent-bright: #2563a8;
+    --signal-green: #1a6b3c;
+    --signal-red: #8b1a1a;
+    --signal-amber: #8b5a00;
+    --border: #c8bfa8;
+    --border-light: #ddd8cc;
+    --muted: #6b6456;
+    --rule: #b0a898;
+    --code-bg: #1a1a24;
+    --code-fg: #e8e0d0;
+    --code-accent: #c9a84c;
+    --code-comment: #6b7280;
+    --code-keyword: #7dd3fc;
+    --code-string: #86efac;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Instrument Sans', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    font-size: 15px;
+    line-height: 1.75;
+  }
+
+  /* ── COVER ── */
+  .cover {
+    min-height: 100vh;
+    background: var(--ink);
+    color: var(--paper);
+    display: grid;
+    grid-template-rows: 1fr auto;
+    padding: 4rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 59px, rgba(201,168,76,0.06) 59px, rgba(201,168,76,0.06) 60px),
+      repeating-linear-gradient(90deg, transparent, transparent 59px, rgba(201,168,76,0.06) 59px, rgba(201,168,76,0.06) 60px);
+    pointer-events: none;
+  }
+
+  .cover-inner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 1000px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .cover-eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 400;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .cover-eyebrow::before {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  .cover-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(56px, 8vw, 96px);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+    color: var(--paper);
+  }
+
+  .cover-subtitle-line {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(20px, 3vw, 32px);
+    color: var(--gold);
+    font-style: italic;
+    margin-bottom: 3rem;
+  }
+
+  .cover-desc {
+    font-size: 15px;
+    line-height: 1.8;
+    color: rgba(245,242,235,0.65);
+    max-width: 640px;
+    margin-bottom: 4rem;
+    font-weight: 300;
+  }
+
+  .cover-meta-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2px;
+    border: 1px solid rgba(201,168,76,0.3);
+    background: rgba(201,168,76,0.1);
+  }
+
+  .cover-meta-cell {
+    padding: 1rem 1.25rem;
+    background: rgba(10,10,15,0.6);
+  }
+
+  .cover-meta-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.25rem;
+  }
+
+  .cover-meta-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--gold);
+    font-weight: 500;
+  }
+
+  .cover-footer {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-top: 1px solid rgba(201,168,76,0.2);
+    padding-top: 2rem;
+    color: rgba(245,242,235,0.35);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .classification-badge {
+    background: var(--gold);
+    color: var(--ink);
+    padding: 4px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  /* ── NAVIGATION ── */
+  .toc-page {
+    background: var(--cream);
+    padding: 6rem 4rem;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .toc-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 3rem;
+  }
+
+  .toc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 960px;
+  }
+
+  .toc-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-light);
+    text-decoration: none;
+    color: var(--ink);
+    transition: color 0.2s;
+  }
+  .toc-item:hover { color: var(--accent-bright); }
+
+  .toc-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--gold-dim);
+    min-width: 24px;
+    font-weight: 500;
+  }
+
+  .toc-name { font-size: 13.5px; font-weight: 400; flex: 1; }
+
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--border);
+    margin: 0 0.5rem;
+    position: relative;
+    top: -3px;
+  }
+
+  .toc-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--muted);
+  }
+
+  /* ── MAIN CONTENT ── */
+  .content {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 4rem;
+  }
+
+  .section {
+    padding: 6rem 0 3rem;
+    border-top: 3px solid var(--ink);
+    margin-top: 5rem;
+  }
+
+  .section:first-of-type { margin-top: 0; }
+
+  .section-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 2rem;
+    margin-bottom: 3rem;
+  }
+
+  .section-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 80px;
+    line-height: 1;
+    color: var(--border);
+    font-style: italic;
+    min-width: 80px;
+    letter-spacing: -0.05em;
+  }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(28px, 4vw, 44px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+
+  .section-title em { font-style: italic; color: var(--gold-dim); }
+
+  h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin: 2.5rem 0 1rem;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border-light);
+  }
+
+  h4 {
+    font-family: 'Instrument Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 2rem 0 0.75rem;
+  }
+
+  h5 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gold-dim);
+    margin: 1.5rem 0 0.5rem;
+    letter-spacing: 0.05em;
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: #1a1a24;
+    font-weight: 300;
+  }
+
+  strong { font-weight: 600; color: var(--ink); }
+  em { color: var(--muted); }
+
+  .callout {
+    border-left: 3px solid var(--gold);
+    padding: 1.25rem 1.5rem;
+    background: rgba(201,168,76,0.06);
+    margin: 2rem 0;
+  }
+
+  .callout-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .callout p { color: var(--ink); font-size: 14px; margin: 0; }
+
+  .callout-insight {
+    border-left-color: var(--accent-bright);
+    background: rgba(37,99,168,0.05);
+  }
+  .callout-insight .callout-label { color: var(--accent-bright); }
+
+  .callout-warning {
+    border-left-color: var(--signal-red);
+    background: rgba(139,26,26,0.04);
+  }
+  .callout-warning .callout-label { color: var(--signal-red); }
+
+  .callout-success {
+    border-left-color: var(--signal-green);
+    background: rgba(26,107,60,0.04);
+  }
+  .callout-success .callout-label { color: var(--signal-green); }
+
+  /* ── MODEL CARDS ── */
+  .model-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    margin: 1.5rem 0;
+    border: 1px solid var(--border);
+  }
+
+  .model-card {
+    background: var(--paper);
+    padding: 1.75rem;
+    position: relative;
+  }
+
+  .model-card.optional {
+    background: var(--cream);
+  }
+
+  .model-index {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.4rem;
+  }
+
+  .model-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 19px;
+    margin-bottom: 0.3rem;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+
+  .model-tech {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent-bright);
+    margin-bottom: 0.75rem;
+    font-weight: 500;
+  }
+
+  .model-purpose-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.35rem;
+    margin-top: 0.75rem;
+  }
+
+  .model-purpose {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .model-tag-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 1rem;
+  }
+
+  .mtag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    border-radius: 2px;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .mtag-core { background: rgba(10,10,15,0.08); color: var(--ink); }
+  .mtag-quant { background: rgba(26,58,92,0.12); color: var(--accent); }
+  .mtag-nlp { background: rgba(201,168,76,0.15); color: var(--gold-dim); }
+  .mtag-rag { background: rgba(26,107,60,0.12); color: var(--signal-green); }
+  .mtag-risk { background: rgba(139,26,26,0.12); color: var(--signal-red); }
+  .mtag-alpha { background: rgba(139,90,0,0.12); color: var(--signal-amber); }
+  .mtag-optional { background: rgba(196,181,253,0.2); color: #5b21b6; }
+
+  /* ── ALPHA SIGNAL CARDS ── */
+  .alpha-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin: 1.5rem 0;
+  }
+
+  .alpha-cell {
+    background: var(--paper);
+    padding: 1.25rem;
+  }
+
+  .alpha-id {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--gold-dim);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .alpha-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--ink);
+    margin-bottom: 0.25rem;
+  }
+
+  .alpha-desc {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.5;
+    font-weight: 300;
+  }
+
+  /* ── SPEC ROWS ── */
+  .spec-list { margin: 1rem 0; }
+
+  .spec-row {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--border-light);
+    align-items: baseline;
+  }
+
+  .spec-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--gold-dim);
+    font-weight: 500;
+  }
+
+  .spec-val {
+    font-size: 13.5px;
+    color: var(--ink);
+    font-weight: 300;
+  }
+
+  /* ── STACK DIAGRAM ── */
+  .diagram {
+    background: var(--ink);
+    color: #a0a8b8;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    line-height: 1.6;
+    padding: 2rem 2.5rem;
+    margin: 2rem 0;
+    overflow-x: auto;
+    border: 1px solid rgba(201,168,76,0.2);
+    position: relative;
+  }
+
+  .diagram::before {
+    content: attr(data-title);
+    display: block;
+    color: var(--gold);
+    font-size: 9px;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+
+  .diag-gold { color: var(--gold); }
+  .diag-blue { color: #7dd3fc; }
+  .diag-green { color: #86efac; }
+  .diag-purple { color: #c4b5fd; }
+  .diag-red { color: #fca5a5; }
+  .diag-amber { color: #fcd34d; }
+  .diag-muted { color: #6b7280; }
+
+  /* ── TABLE ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1.5rem 0;
+    font-size: 13.5px;
+  }
+
+  th {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--paper);
+    background: var(--ink);
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-weight: 500;
+  }
+
+  td {
+    padding: 0.65rem 1rem;
+    border-bottom: 1px solid var(--border-light);
+    color: #1a1a24;
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: rgba(201,168,76,0.03); }
+  tr:hover td { background: rgba(201,168,76,0.07); }
+
+  td code, code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    background: rgba(201,168,76,0.12);
+    color: var(--gold-dim);
+    padding: 1px 6px;
+    border-radius: 2px;
+  }
+
+  /* ── EXCLUSION BLOCK ── */
+  .exclusion-list {
+    border: 1px solid rgba(139,26,26,0.3);
+    background: rgba(139,26,26,0.03);
+    padding: 1.5rem 2rem;
+    margin: 1.5rem 0;
+  }
+
+  .exclusion-item {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid rgba(139,26,26,0.1);
+    font-size: 13.5px;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  .exclusion-item:last-child { border-bottom: none; }
+
+  .excl-icon {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--signal-red);
+    font-weight: 700;
+    min-width: 16px;
+  }
+
+  .excl-reason {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: rgba(139,26,26,0.6);
+    margin-left: auto;
+  }
+
+  /* ── MINIMAL STACK ── */
+  .minimal-stack {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--gold);
+    border: 2px solid var(--gold);
+    margin: 1.5rem 0;
+  }
+
+  .ms-cell {
+    background: var(--ink);
+    padding: 1.25rem 1.5rem;
+    color: var(--paper);
+  }
+
+  .ms-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--gold);
+    letter-spacing: 0.2em;
+    margin-bottom: 0.3rem;
+  }
+
+  .ms-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 16px;
+    color: var(--paper);
+    line-height: 1.2;
+  }
+
+  /* ── FOOTER ── */
+  .doc-footer {
+    background: var(--ink);
+    color: rgba(245,242,235,0.3);
+    padding: 3rem 4rem;
+    margin-top: 6rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  ul { padding-left: 1.5rem; margin: 0.5rem 0; }
+  li { margin-bottom: 0.3rem; font-size: 13.5px; font-weight: 300; }
+
+  @media (max-width: 768px) {
+    .cover { padding: 2rem; }
+    .cover-meta-grid { grid-template-columns: 1fr 1fr; }
+    .content { padding: 0 1.5rem; }
+    .toc-page { padding: 3rem 1.5rem; }
+    .toc-grid { grid-template-columns: 1fr; }
+    .section-header { flex-direction: column; gap: 0.5rem; }
+    .section-number { font-size: 40px; min-width: auto; }
+    .alpha-grid { grid-template-columns: repeat(2, 1fr); }
+    .minimal-stack { grid-template-columns: 1fr; }
+    .spec-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-inner">
+    <div class="cover-eyebrow">Model Architecture Reference · PS2 Equity Research AI Agent · Internal</div>
+    <div class="cover-title">EREBUS</div>
+    <div class="cover-subtitle-line">Final Optimised Model Stack</div>
+    <p class="cover-desc">
+      This document defines the final, in-scope model stack for the EREBUS Equity Research AI Agent (PS2). All models are selected for alignment with the platform's core approach: balance sheet analysis, alpha signal generation, and retrieval-augmented generation (RAG). Models outside scope are explicitly excluded.
+    </p>
+    <div class="cover-meta-grid">
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Document</div>
+        <div class="cover-meta-value">MODEL-STACK-v2</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Status</div>
+        <div class="cover-meta-value">FINAL · IN-SCOPE</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Model Count</div>
+        <div class="cover-meta-value">14 Models (11 Core)</div>
+      </div>
+      <div class="cover-meta-cell">
+        <div class="cover-meta-label">Core Approach</div>
+        <div class="cover-meta-value">RAG + Quant + Alpha</div>
+      </div>
+    </div>
+  </div>
+  <div class="cover-footer">
+    <div>EREBUS Platform · Model Stack Reference v2.0 · Property of [FIRM NAME REDACTED]</div>
+    <div><span class="classification-badge">Restricted — Internal Use</span></div>
+  </div>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc-page">
+  <div class="toc-title">Contents of This Document</div>
+  <div class="toc-grid">
+    <a class="toc-item" href="#s1"><span class="toc-num">§A</span><span class="toc-name">System Architecture Overview</span><span class="toc-dots"></span><span class="toc-tag">Diagram</span></a>
+    <a class="toc-item" href="#s2"><span class="toc-num">§B</span><span class="toc-name">Retrieval & Knowledge Layer</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s3"><span class="toc-num">§C</span><span class="toc-name">Large Language Model</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s4"><span class="toc-num">§D</span><span class="toc-name">Financial Ratio Models</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s5"><span class="toc-num">§E</span><span class="toc-name">Time-Series Trend Models</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s6"><span class="toc-num">§F</span><span class="toc-name">Volatility Models</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s7"><span class="toc-num">§G</span><span class="toc-name">Risk Scoring Model</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s8"><span class="toc-num">§H</span><span class="toc-name">Alpha Signal Models</span><span class="toc-dots"></span><span class="toc-tag">Differentiator</span></a>
+    <a class="toc-item" href="#s9"><span class="toc-num">§I</span><span class="toc-name">Correlation & Ranking</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s10"><span class="toc-num">§J</span><span class="toc-name">Sentiment Analysis</span><span class="toc-dots"></span><span class="toc-tag">Core</span></a>
+    <a class="toc-item" href="#s11"><span class="toc-num">§K</span><span class="toc-name">Optional Advanced Models</span><span class="toc-dots"></span><span class="toc-tag">V1.5+</span></a>
+    <a class="toc-item" href="#s12"><span class="toc-num">§L</span><span class="toc-name">Models Excluded (In-Scope Rules)</span><span class="toc-dots"></span><span class="toc-tag">Boundary</span></a>
+    <a class="toc-item" href="#s13"><span class="toc-num">§M</span><span class="toc-name">Minimal Winning Stack</span><span class="toc-dots"></span><span class="toc-tag">Practical</span></a>
+    <a class="toc-item" href="#s14"><span class="toc-num">§N</span><span class="toc-name">Full Stack Reference Table</span><span class="toc-dots"></span><span class="toc-tag">Summary</span></a>
+  </div>
+</div>
+
+<div class="content">
+
+<!-- §A — ARCHITECTURE OVERVIEW -->
+<div id="s1" class="section">
+  <div class="section-header">
+    <div class="section-number">A</div>
+    <div>
+      <div class="section-label">Section Alpha</div>
+      <div class="section-title">System Architecture <em>Overview</em></div>
+    </div>
+  </div>
+
+  <div class="callout callout-insight">
+    <div class="callout-label">Design Principle</div>
+    <p>The EREBUS model stack is designed around three interlocking pillars: <strong>Retrieval</strong> (find the right evidence), <strong>Quantitative Analysis</strong> (compute structured signals), and <strong>Language Generation</strong> (synthesise explainable, source-cited output). Every model in scope serves at least one of these pillars. Models that serve trading, allocation, or price prediction are explicitly out of scope.</p>
+  </div>
+
+  <div class="diagram" data-title="erebus · full model stack · layer architecture">
+<span class="diag-muted">┌─────────────────────────────────────────────────────────────────────────────────┐</span>
+<span class="diag-muted">│                        EREBUS MODEL STACK — FULL VIEW                          │</span>
+<span class="diag-muted">└─────────────────────────────────────────────────────────────────────────────────┘</span>
+
+<span class="diag-blue">┌── LAYER 1 · RETRIEVAL & KNOWLEDGE ──────────────────────────────────────────────┐</span>
+<span class="diag-blue">│  [M1] Embedding Model         →  Chunk & index annual reports, transcripts      │</span>
+<span class="diag-blue">│  [M1] Vector Retrieval (FAISS/OpenSearch) → Semantic search, source citation    │</span>
+<span class="diag-blue">└─────────────────────────────────────────────────────────────────────────────────┘</span>
+                                          ↓ retrieved context
+<span class="diag-gold">┌── LAYER 2 · LANGUAGE GENERATION ────────────────────────────────────────────────┐</span>
+<span class="diag-gold">│  [M2] LLM (Claude via Bedrock / GPT)                                            │</span>
+<span class="diag-gold">│       Analyst-style explanations · Signal synthesis · Structured output         │</span>
+<span class="diag-gold">└─────────────────────────────────────────────────────────────────────────────────┘</span>
+                    ↑ alpha signals + risk scores + sentiment
+<span class="diag-green">┌── LAYER 3 · QUANTITATIVE CORE ──────────────────────────────────────────────────┐</span>
+<span class="diag-green">│  [M3] Financial Ratios     Revenue Growth · NPM · ROE · D/E                     │</span>
+<span class="diag-green">│  [M4] Time-Series Trend    Linear Regression · Moving Average                   │</span>
+<span class="diag-green">│  [M5] Volatility           Std Dev · Parkinson Volatility                       │</span>
+<span class="diag-green">│  [M6] Risk Scoring         Rule-based · debt + margin + volatility              │</span>
+<span class="diag-green">│  [M8] Correlation          Pearson · cross-company relationships                │</span>
+<span class="diag-green">│  [M9] Cross-Sectional Rank Rank-based sector comparison                        │</span>
+<span class="diag-green">│  [M11] Consistency Model   Variance of growth metrics over time                │</span>
+<span class="diag-green">└─────────────────────────────────────────────────────────────────────────────────┘</span>
+                    ↑ tone · credibility · sentiment signals
+<span class="diag-amber">┌── LAYER 4 · NLP / SIGNAL ───────────────────────────────────────────────────────┐</span>
+<span class="diag-amber">│  [M10] Sentiment (FinBERT)  Earnings call tone · Credibility feed               │</span>
+<span class="diag-amber">│  [M7]  Alpha Signals ×8     Growth · Margin · Consistency · Risk ·              │</span>
+<span class="diag-amber">│                             Volatility · Credibility · Sentiment · Rel.Strength │</span>
+<span class="diag-amber">└─────────────────────────────────────────────────────────────────────────────────┘</span>
+<span class="diag-purple">┌── LAYER 5 · OPTIONAL (V1.5+) ───────────────────────────────────────────────────┐</span>
+<span class="diag-purple">│  [M12] Random Forest / XGBoost   Risk classification, pattern detection         │</span>
+<span class="diag-purple">│  [M13] CAPM / Beta Factor         Systematic risk, institutional depth          │</span>
+<span class="diag-purple">│  [M14] NLI Entailment (Verifier)  Hallucination reduction                       │</span>
+<span class="diag-purple">└─────────────────────────────────────────────────────────────────────────────────┘</span>
+  </div>
+</div>
+
+<!-- §B — RETRIEVAL -->
+<div id="s2" class="section">
+  <div class="section-header">
+    <div class="section-number">B</div>
+    <div>
+      <div class="section-label">Model Group 1</div>
+      <div class="section-title">Retrieval & <em>Knowledge</em> Layer</div>
+    </div>
+  </div>
+
+  <p>The retrieval layer is the epistemic foundation of EREBUS. It is the mechanism by which the platform grounds every generated insight in verifiable source documents — annual reports, earnings call transcripts, regulatory filings. Without this layer, the LLM operates on parametric memory alone; with it, every claim can be traced to a specific document, page, and section.</p>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 01-A · Core</div>
+      <div class="model-name">Document Embedding Model</div>
+      <div class="model-tech">text-embedding-3-large · BGE-M3 · E5-large-v2</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Converts document chunks (paragraphs, table rows, MD&A sections) into dense vector representations. These vectors capture semantic meaning — enabling retrieval by concept, not keyword. All annual reports and earnings transcripts are pre-chunked and embedded at ingestion time.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-rag">RAG</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-index">Model 01-B · Core</div>
+      <div class="model-name">Vector Retrieval Engine</div>
+      <div class="model-tech">FAISS · Qdrant · OpenSearch kNN</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Given a user query or analytical question, retrieves the top-k most semantically relevant document chunks. Retrieval is filtered by company, document type, and date range. Results carry source metadata (document, page, section) that is injected into the LLM prompt and preserved in final output citations.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-rag">RAG</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Chunk Strategy</span><span class="spec-val">Semantic chunking with 512-token windows, 64-token overlap. Tables extracted separately and embedded as structured text.</span></div>
+    <div class="spec-row"><span class="spec-key">Index Scope</span><span class="spec-val">Annual reports (FY20–FY24), quarterly earnings transcripts, SEBI filings, investor presentations.</span></div>
+    <div class="spec-row"><span class="spec-key">Retrieval Mode</span><span class="spec-val">Hybrid: dense vector search + BM25 keyword fallback. Reranker (Cohere Rerank or BGE-Reranker) applied to top-20 candidates before final top-5 selection.</span></div>
+    <div class="spec-row"><span class="spec-key">Source Citation</span><span class="spec-val">Every retrieved chunk carries: <code>doc_id</code>, <code>page_num</code>, <code>section_title</code>, <code>chunk_text</code>. Citations mandatory in all LLM output.</span></div>
+  </div>
+</div>
+
+<!-- §C — LLM -->
+<div id="s3" class="section">
+  <div class="section-header">
+    <div class="section-number">C</div>
+    <div>
+      <div class="section-label">Model Group 2</div>
+      <div class="section-title">Large Language <em>Model</em></div>
+    </div>
+  </div>
+
+  <p>The LLM is the synthesis engine. It receives retrieved document evidence, computed quantitative signals, and structured alpha scores — and produces analyst-grade, explainable written output. The LLM does not perform calculations directly; it narrates and reasons over pre-computed outputs from the quantitative layer.</p>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 02 · Core</div>
+      <div class="model-name">Large Language Model</div>
+      <div class="model-tech">Amazon Bedrock (Claude) · Anthropic Claude · OpenAI GPT-4o</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Generates analyst-style written explanations combining quantitative signals with retrieved documentary evidence. Produces structured outputs: risk assessments, guidance credibility analysis, factor decompositions, executive summaries. Operates under strict source-citation requirements — every factual claim must reference a retrieved document chunk.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-rag">RAG</span>
+        <span class="mtag mtag-nlp">Language</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-label">Scope Constraint</div>
+    <p>The LLM is explicitly constrained from making investment recommendations, price predictions, or portfolio allocation suggestions. Its role is to <em>explain and synthesise</em> — not to advise. System prompts enforce this boundary at inference time with refusal logic for out-of-scope queries.</p>
+  </div>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Input Context</span><span class="spec-val">Retrieved chunks (top-5), pre-computed alpha scores, risk score, financial ratios, trend signals, sentiment score — all structured and injected as system context.</span></div>
+    <div class="spec-row"><span class="spec-key">Output Format</span><span class="spec-val">Structured JSON (for API consumers) + Markdown (for report rendering). Every factual claim tagged with source citation ID.</span></div>
+    <div class="spec-row"><span class="spec-key">Deployment</span><span class="spec-val">Amazon Bedrock (primary) for AWS-native security posture. OpenAI GPT-4o as fallback. Model abstraction layer allows hot-swapping.</span></div>
+    <div class="spec-row"><span class="spec-key">Guardrails</span><span class="spec-val">Constitutional AI prompting. Refusal for: price targets, portfolio weights, buy/sell recommendations, insider information queries.</span></div>
+  </div>
+</div>
+
+<!-- §D — FINANCIAL RATIOS -->
+<div id="s4" class="section">
+  <div class="section-header">
+    <div class="section-number">D</div>
+    <div>
+      <div class="section-label">Model Group 3</div>
+      <div class="section-title">Financial Ratio <em>Models</em></div>
+    </div>
+  </div>
+
+  <p>The financial ratio layer is the analytical bedrock of the quant stack. These are deterministic, formula-based computations applied to structured balance sheet and income statement data. They are the raw inputs from which all higher-order signals (alphas, risk scores) are derived.</p>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 03 · Core Quant</div>
+      <div class="model-name">Financial Ratio Suite</div>
+      <div class="model-tech">Deterministic · Formula-Based · Python / Pandas</div>
+      <div class="model-purpose-label">Ratios Computed</div>
+      <div class="model-purpose">Revenue Growth (YoY, CAGR) · Net Profit Margin · Return on Equity (ROE) · Debt-to-Equity Ratio · Free Cash Flow Conversion · Interest Coverage Ratio · Asset Turnover</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Produce the fundamental financial features that feed the alpha signal engine, risk scorer, and time-series trend models. Base layer for all comparative analysis.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-quant">Quant</span>
+      </div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Ratio</th><th>Formula</th><th>Data Source</th><th>Feeds Into</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Revenue Growth (YoY)</td><td><code>(Rev_t − Rev_{t-1}) / Rev_{t-1}</code></td><td>P&L Statement</td><td>Growth Alpha, Trend Model</td></tr>
+      <tr><td>Net Profit Margin</td><td><code>PAT / Revenue</code></td><td>P&L Statement</td><td>Margin Alpha, Risk Score</td></tr>
+      <tr><td>Return on Equity</td><td><code>PAT / Avg Shareholders' Equity</code></td><td>Balance Sheet + P&L</td><td>Quality Score, Ranking</td></tr>
+      <tr><td>Debt-to-Equity</td><td><code>Total Debt / Shareholders' Equity</code></td><td>Balance Sheet</td><td>Risk Alpha, Risk Score</td></tr>
+      <tr><td>FCF Conversion</td><td><code>FCF / PAT</code></td><td>Cash Flow Statement</td><td>Quality Score, Credibility Alpha</td></tr>
+      <tr><td>Interest Coverage</td><td><code>EBIT / Interest Expense</code></td><td>P&L Statement</td><td>Risk Scoring</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- §E — TIME-SERIES TREND -->
+<div id="s5" class="section">
+  <div class="section-header">
+    <div class="section-number">E</div>
+    <div>
+      <div class="section-label">Model Group 4</div>
+      <div class="section-title">Time-Series <em>Trend Models</em></div>
+    </div>
+  </div>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 04-A · Core</div>
+      <div class="model-name">Linear Regression (Trend Slope)</div>
+      <div class="model-tech">scikit-learn · OLS · Rolling Windows</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Fits a linear trend line to 5-year historical series of key metrics (revenue, margins, ROE). The slope coefficient indicates directional momentum — rising, flat, or declining. Enables the platform to distinguish a structurally improving business from one masking deterioration.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-quant">Quant</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-index">Model 04-B · Core</div>
+      <div class="model-name">Moving Average</div>
+      <div class="model-tech">3-Year / 5-Year Trailing Average</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Smooths annual metric volatility to surface underlying performance trajectory. Moving average deviation (current vs trailing avg) is a key input to the Relative Strength Alpha and the Consistency model. Removes single-year distortions caused by one-off events.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-quant">Quant</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- §F — VOLATILITY -->
+<div id="s6" class="section">
+  <div class="section-header">
+    <div class="section-number">F</div>
+    <div>
+      <div class="section-label">Model Group 5</div>
+      <div class="section-title">Volatility <em>Models</em></div>
+    </div>
+  </div>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 05-A · Core</div>
+      <div class="model-name">Standard Deviation of Returns</div>
+      <div class="model-tech">Rolling 3-Year σ on Key Metrics</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Measures the year-on-year variability of revenue growth, margins, and earnings. High standard deviation signals an unpredictable business. Feeds directly into the Volatility Alpha and Risk Score as a negative quality signal.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-risk">Risk</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-index">Model 05-B · Core</div>
+      <div class="model-name">Parkinson Volatility Estimator</div>
+      <div class="model-tech">High-Low Range Based Estimator</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">A more efficient volatility estimate using the range of a metric across reporting periods. Particularly effective when sample sizes are small (5-year history), as it extracts more information per data point than standard deviation alone. Supplements the σ model for robustness.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-risk">Risk</span>
+        <span class="mtag mtag-quant">Quant</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- §G — RISK SCORING -->
+<div id="s7" class="section">
+  <div class="section-header">
+    <div class="section-number">G</div>
+    <div>
+      <div class="section-label">Model Group 6</div>
+      <div class="section-title">Risk <em>Scoring Model</em></div>
+    </div>
+  </div>
+
+  <p>The risk scoring model transforms multiple quantitative signals into a single, interpretable risk classification. It is rule-based and weighted — intentionally transparent, so that risk assessments can be explained to institutional clients without reference to a "black box."</p>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 06 · Core</div>
+      <div class="model-name">Weighted Risk Score</div>
+      <div class="model-tech">Rule-Based · Interpretable · Weighted Composite</div>
+      <div class="model-purpose-label">Input Signals</div>
+      <div class="model-purpose">Debt-to-Equity level and trend · Net Profit Margin trend · Revenue volatility (σ) · Interest Coverage Ratio · FCF Conversion stability · Sentiment negativity score</div>
+      <div class="model-purpose-label">Output</div>
+      <div class="model-purpose">Risk classification: <strong>LOW</strong> / <strong>MEDIUM</strong> / <strong>HIGH</strong>, with numeric score 0–100 and factor-level breakdown explaining each contribution to final score.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-risk">Risk</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Scoring Method</span><span class="spec-val">Weighted sum of normalised factor scores. Weights calibrated against sector benchmarks. Debt signals carry highest weight (30%), margin trend second (25%).</span></div>
+    <div class="spec-row"><span class="spec-key">Thresholds</span><span class="spec-val">LOW: 0–33 · MEDIUM: 34–66 · HIGH: 67–100. Thresholds are configurable per sector (e.g., banking D/E norms differ from FMCG).</span></div>
+    <div class="spec-row"><span class="spec-key">Explainability</span><span class="spec-val">Waterfall chart showing each factor's contribution to the final score. No black-box outputs. Every score is decomposable and auditable.</span></div>
+  </div>
+</div>
+
+<!-- §H — ALPHA SIGNALS -->
+<div id="s8" class="section">
+  <div class="section-header">
+    <div class="section-number">H</div>
+    <div>
+      <div class="section-label">Model Group 7 · Core Differentiator</div>
+      <div class="section-title">Alpha Signal <em>Models</em></div>
+    </div>
+  </div>
+
+  <p>The alpha signal layer is the primary differentiator of the EREBUS platform. Rather than presenting raw financial ratios to users, the system converts them into named, scored, directional signals — each with a clear economic interpretation. These signals are the language through which EREBUS communicates analytical judgment.</p>
+
+  <div class="callout callout-insight">
+    <div class="callout-label">Design Rationale</div>
+    <p>Alpha signals sit between raw data and narrative. They transform numbers (e.g., "margin declined 2.3pp") into scored, directional assessments (e.g., "Margin Alpha: −14, deteriorating trend over 3 years") that the LLM can reason over and the risk model can incorporate. They are the semantic bridge between the quant layer and the language layer.</p>
+  </div>
+
+  <div class="alpha-grid">
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 01</div>
+      <div class="alpha-name">Growth Alpha</div>
+      <div class="alpha-desc">Revenue and earnings growth rate vs sector median and own 5-year history. Captures absolute and relative growth quality.</div>
+    </div>
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 02</div>
+      <div class="alpha-name">Margin Alpha</div>
+      <div class="alpha-desc">Trend in gross, operating, and net profit margins. Distinguishes expanding vs compressing margin structures.</div>
+    </div>
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 03</div>
+      <div class="alpha-name">Consistency Alpha</div>
+      <div class="alpha-desc">Regularity and predictability of growth. Low variance, high hit rate. Rewards steady compounders over erratic performers.</div>
+    </div>
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 04</div>
+      <div class="alpha-name">Risk Alpha</div>
+      <div class="alpha-desc">Composite of leverage, coverage, and margin stability signals. Negative alpha for high-debt, low-coverage businesses.</div>
+    </div>
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 05</div>
+      <div class="alpha-name">Volatility Alpha</div>
+      <div class="alpha-desc">Inverse of earnings and revenue volatility. Stable businesses score positively; cyclical / erratic ones score negatively.</div>
+    </div>
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 06</div>
+      <div class="alpha-name">Credibility Alpha</div>
+      <div class="alpha-desc">Management Credibility Score (MCS) — tracks guidance vs actual delivery over historical periods. High MCS = trustworthy forward-looking statements.</div>
+    </div>
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 07</div>
+      <div class="alpha-name">Sentiment Alpha</div>
+      <div class="alpha-desc">FinBERT-derived tone score from earnings call transcripts. Tracks language trajectory: improving / stable / deteriorating confidence signals.</div>
+    </div>
+    <div class="alpha-cell">
+      <div class="alpha-id">Alpha 08</div>
+      <div class="alpha-name">Relative Strength Alpha</div>
+      <div class="alpha-desc">Performance vs sector peers on key metrics. Identifies outperformers and laggards within peer groups. Feeds cross-sectional ranking.</div>
+    </div>
+  </div>
+
+  <div class="spec-list">
+    <div class="spec-row"><span class="spec-key">Score Range</span><span class="spec-val">Each alpha is normalised to −100 → +100. Positive = bullish signal, negative = bearish. Zero = neutral / insufficient data.</span></div>
+    <div class="spec-row"><span class="spec-key">Composite Score</span><span class="spec-val">Weighted combination of all 8 alphas produces a single Composite Alpha Score (CAS). Weights are sector-configurable. Default: Growth (20%), Margin (20%), Risk (15%), Credibility (15%), Consistency (15%), Sentiment (10%), Volatility (5%).</span></div>
+    <div class="spec-row"><span class="spec-key">Explainability</span><span class="spec-val">Each alpha score accompanied by textual rationale generated by the LLM, grounded in retrieved document evidence where applicable.</span></div>
+  </div>
+</div>
+
+<!-- §I — CORRELATION & RANKING -->
+<div id="s9" class="section">
+  <div class="section-header">
+    <div class="section-number">I</div>
+    <div>
+      <div class="section-label">Model Group 8 & 9</div>
+      <div class="section-title">Correlation & <em>Ranking</em></div>
+    </div>
+  </div>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 08 · Core</div>
+      <div class="model-name">Pearson Correlation</div>
+      <div class="model-tech">scipy.stats · Rolling Pairwise Correlation</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Identifies relationships between companies' financial metrics — e.g., whether two banks' NIM trajectories are correlated, or whether a supplier's revenue growth tracks a customer's capex cycle. Enables comparative analysis and contagion risk identification. <strong>Not used for portfolio allocation.</strong></div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-quant">Quant</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-index">Model 09 · Core</div>
+      <div class="model-name">Cross-Sectional Ranking</div>
+      <div class="model-tech">Percentile Rank · Z-Score Normalisation</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Ranks companies within a sector on each alpha signal and on composite score. Percentile-normalised so that rankings are comparable across sectors with different absolute metric ranges. Output: ranked league table with factor-level attribution explaining each company's position.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-quant">Quant</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- §J — SENTIMENT -->
+<div id="s10" class="section">
+  <div class="section-header">
+    <div class="section-number">J</div>
+    <div>
+      <div class="section-label">Model Group 10</div>
+      <div class="section-title">Sentiment <em>Analysis Model</em></div>
+    </div>
+  </div>
+
+  <div class="model-grid">
+    <div class="model-card">
+      <div class="model-index">Model 10 · Core NLP</div>
+      <div class="model-name">Financial Sentiment (FinBERT)</div>
+      <div class="model-tech">FinBERT · ProsusAI/finbert · Hugging Face Transformers</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Classifies tone of earnings call transcripts and MD&A sections as positive / negative / neutral at the sentence level. Aggregated scores feed: Sentiment Alpha (M7), Credibility Alpha (confidence trajectory), and Risk Score (management distress signals).</div>
+      <div class="model-purpose-label">Additional Signals</div>
+      <div class="model-purpose">Tracks sentiment trajectory over multiple quarters — a deteriorating tone that precedes financial results is an early warning signal. Uncertainty language detection (hedging, qualifications) feeds the Credibility Alpha.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-nlp">NLP</span>
+        <span class="mtag mtag-rag">RAG-adjacent</span>
+      </div>
+    </div>
+    <div class="model-card">
+      <div class="model-index">Model 11 · Core</div>
+      <div class="model-name">Consistency Model</div>
+      <div class="model-tech">Variance / Coefficient of Variation Analysis</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Measures stability of growth metrics across years. Computes coefficient of variation (CV = σ/μ) for revenue growth, margin, and ROE. Low CV = consistent performance = positive Consistency Alpha. Erratic CV = risk flag. Specifically separates structural consistency from cyclical patterns.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-core">Core</span>
+        <span class="mtag mtag-quant">Quant</span>
+        <span class="mtag mtag-alpha">Alpha Feed</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- §K — OPTIONAL ADVANCED -->
+<div id="s11" class="section">
+  <div class="section-header">
+    <div class="section-number">K</div>
+    <div>
+      <div class="section-label">Model Group 12–14 · Optional</div>
+      <div class="section-title">Advanced Optional <em>Models (V1.5+)</em></div>
+    </div>
+  </div>
+
+  <p>These models are not required for V1.0 and should not block the initial build. They are included in the architecture to define the upgrade path and ensure the codebase is designed to accommodate them without structural refactoring.</p>
+
+  <div class="model-grid">
+    <div class="model-card optional">
+      <div class="model-index">Model 12 · Optional · V1.5</div>
+      <div class="model-name">Random Forest / XGBoost Classifier</div>
+      <div class="model-tech">scikit-learn RF · XGBoost · MLflow versioning</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Learns non-linear patterns in financial features to classify companies into risk buckets or predict earnings beat/miss probability. Requires labelled historical data for training. Supplements but does not replace the rule-based risk scorer — adds ML depth where patterns are non-obvious.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-optional">Optional</span>
+        <span class="mtag mtag-risk">Risk</span>
+      </div>
+    </div>
+    <div class="model-card optional">
+      <div class="model-index">Model 13 · Optional · V1.5</div>
+      <div class="model-name">CAPM / Beta Factor Model</div>
+      <div class="model-tech">OLS Regression on Market Returns</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Computes the company's systematic risk (β) relative to a benchmark index (NIFTY 50). Adds institutional-level depth to the risk analysis. Requires market price data — flagged as optional because EREBUS is primarily fundamental, not market-price driven. Add when price data pipeline is established.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-optional">Optional</span>
+        <span class="mtag mtag-quant">Quant</span>
+      </div>
+    </div>
+    <div class="model-card optional">
+      <div class="model-index">Model 14 · Optional · V2.0</div>
+      <div class="model-name">NLI Entailment Verifier</div>
+      <div class="model-tech">DeBERTa-v3-NLI · Cross-Encoder Entailment</div>
+      <div class="model-purpose-label">Purpose</div>
+      <div class="model-purpose">Validates that LLM-generated insights are logically entailed by the retrieved source documents. Catches hallucinations where the LLM generates plausible-sounding but unsupported claims. Each generated sentence is scored: ENTAILED / NEUTRAL / CONTRADICTED vs source chunks. Critical for institutional trust.</div>
+      <div class="model-tag-row">
+        <span class="mtag mtag-optional">Optional</span>
+        <span class="mtag mtag-nlp">NLP</span>
+        <span class="mtag mtag-rag">RAG Quality</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- §L — EXCLUSIONS -->
+<div id="s12" class="section">
+  <div class="section-header">
+    <div class="section-number">L</div>
+    <div>
+      <div class="section-label">Scope Boundary — Critical</div>
+      <div class="section-title">Models <em>Excluded</em></div>
+    </div>
+  </div>
+
+  <div class="callout callout-warning">
+    <div class="callout-label">Scope Enforcement</div>
+    <p>The following model categories are explicitly out of scope for EREBUS PS2. Including them would misrepresent the platform as a trading or portfolio management system — which it is not. These exclusions are final and should not be overridden under client pressure to "add alpha."</p>
+  </div>
+
+  <div class="exclusion-list">
+    <div class="exclusion-item">
+      <span class="excl-icon">✕</span>
+      <span><strong>Portfolio Optimisation Models</strong> — Markowitz Mean-Variance, Risk Parity, Black-Litterman</span>
+      <span class="excl-reason">ALLOCATION / OUT OF SCOPE</span>
+    </div>
+    <div class="exclusion-item">
+      <span class="excl-icon">✕</span>
+      <span><strong>Price Prediction Models</strong> — LSTM price forecasting, Prophet, ARIMA on stock prices</span>
+      <span class="excl-reason">TRADING / OUT OF SCOPE</span>
+    </div>
+    <div class="exclusion-item">
+      <span class="excl-icon">✕</span>
+      <span><strong>Trading Strategy Models</strong> — momentum strategies, mean-reversion signals, pairs trading</span>
+      <span class="excl-reason">TRADING / OUT OF SCOPE</span>
+    </div>
+    <div class="exclusion-item">
+      <span class="excl-icon">✕</span>
+      <span><strong>Reinforcement Learning Trading Systems</strong> — RL agents optimising trade execution or P&L</span>
+      <span class="excl-reason">TRADING / OUT OF SCOPE</span>
+    </div>
+    <div class="exclusion-item">
+      <span class="excl-icon">✕</span>
+      <span><strong>Options Pricing Models</strong> — Black-Scholes, Greeks, implied volatility surfaces</span>
+      <span class="excl-reason">DERIVATIVES / OUT OF SCOPE</span>
+    </div>
+  </div>
+</div>
+
+<!-- §M — MINIMAL WINNING STACK -->
+<div id="s13" class="section">
+  <div class="section-header">
+    <div class="section-number">M</div>
+    <div>
+      <div class="section-label">Practical Implementation Guide</div>
+      <div class="section-title">Minimal <em>Winning Stack</em></div>
+    </div>
+  </div>
+
+  <p>If resource or timeline constraints require prioritisation, the following nine components constitute the minimal stack needed to deliver a compelling, production-quality EREBUS demonstration. Everything else can be layered in post-V1.0.</p>
+
+  <div class="minimal-stack">
+    <div class="ms-cell">
+      <div class="ms-num">01 · Foundation</div>
+      <div class="ms-name">Retrieval (RAG)</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">02 · Synthesis</div>
+      <div class="ms-name">LLM</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">03 · Data Layer</div>
+      <div class="ms-name">Financial Ratios</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">04 · Momentum</div>
+      <div class="ms-name">Trend Model</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">05 · Uncertainty</div>
+      <div class="ms-name">Volatility Model</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">06 · Protection</div>
+      <div class="ms-name">Risk Scoring</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">07 · Differentiator</div>
+      <div class="ms-name">Alpha Signals ×8</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">08 · Relationship</div>
+      <div class="ms-name">Correlation</div>
+    </div>
+    <div class="ms-cell">
+      <div class="ms-num">09 · Competition</div>
+      <div class="ms-name">Ranking Model</div>
+    </div>
+  </div>
+
+  <div class="callout callout-success">
+    <div class="callout-label">Implementation Sequence</div>
+    <p>Build in this order: <strong>(1) Financial Ratios</strong> — establish data pipeline and feature store. <strong>(2) RAG</strong> — embed documents, stand up vector retrieval. <strong>(3) LLM integration</strong> — connect retrieval to generation. <strong>(4) Risk + Trend + Volatility</strong> — add quant depth. <strong>(5) Alpha Signals</strong> — convert quant to named signals. <strong>(6) Correlation + Ranking</strong> — enable comparative analysis. Sentiment and optional models layer in last.</p>
+  </div>
+</div>
+
+<!-- §N — FULL REFERENCE TABLE -->
+<div id="s14" class="section">
+  <div class="section-header">
+    <div class="section-number">N</div>
+    <div>
+      <div class="section-label">Summary Reference</div>
+      <div class="section-title">Full Stack <em>Reference Table</em></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>#</th><th>Model / Component</th><th>Type</th><th>Technology</th><th>Status</th><th>Feeds Into</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>M01</code></td>
+        <td>Embedding + Vector Retrieval</td>
+        <td>RAG</td>
+        <td>text-embedding-3 · FAISS / Qdrant</td>
+        <td>✓ Core</td>
+        <td>LLM context · Source citations</td>
+      </tr>
+      <tr>
+        <td><code>M02</code></td>
+        <td>Large Language Model</td>
+        <td>Language</td>
+        <td>Claude (Bedrock) · GPT-4o</td>
+        <td>✓ Core</td>
+        <td>Final output · Reports</td>
+      </tr>
+      <tr>
+        <td><code>M03</code></td>
+        <td>Financial Ratio Suite</td>
+        <td>Quant</td>
+        <td>Pandas · Deterministic</td>
+        <td>✓ Core</td>
+        <td>All alpha models · Risk scorer</td>
+      </tr>
+      <tr>
+        <td><code>M04</code></td>
+        <td>Trend Models (Linear Reg + MA)</td>
+        <td>Quant</td>
+        <td>scikit-learn · Rolling stats</td>
+        <td>✓ Core</td>
+        <td>Growth Alpha · Rel. Strength Alpha</td>
+      </tr>
+      <tr>
+        <td><code>M05</code></td>
+        <td>Volatility Models (σ + Parkinson)</td>
+        <td>Quant · Risk</td>
+        <td>NumPy · scipy.stats</td>
+        <td>✓ Core</td>
+        <td>Volatility Alpha · Risk Score</td>
+      </tr>
+      <tr>
+        <td><code>M06</code></td>
+        <td>Risk Scoring Model</td>
+        <td>Rule-Based</td>
+        <td>Weighted composite · Python</td>
+        <td>✓ Core</td>
+        <td>Risk classification · LLM context</td>
+      </tr>
+      <tr>
+        <td><code>M07</code></td>
+        <td>Alpha Signal Models ×8</td>
+        <td>Signal</td>
+        <td>Derived from M03–M06 + M10</td>
+        <td>✓ Core · Differentiator</td>
+        <td>Ranking · LLM · Reports</td>
+      </tr>
+      <tr>
+        <td><code>M08</code></td>
+        <td>Pearson Correlation</td>
+        <td>Quant</td>
+        <td>scipy · pandas.corr</td>
+        <td>✓ Core</td>
+        <td>Comparative analysis · Contagion risk</td>
+      </tr>
+      <tr>
+        <td><code>M09</code></td>
+        <td>Cross-Sectional Ranking</td>
+        <td>Quant</td>
+        <td>Percentile rank · Z-score norm</td>
+        <td>✓ Core</td>
+        <td>Universe scorecard · Dashboard</td>
+      </tr>
+      <tr>
+        <td><code>M10</code></td>
+        <td>Sentiment Analysis (FinBERT)</td>
+        <td>NLP</td>
+        <td>ProsusAI/finbert · HuggingFace</td>
+        <td>✓ Core</td>
+        <td>Sentiment Alpha · Credibility Alpha</td>
+      </tr>
+      <tr>
+        <td><code>M11</code></td>
+        <td>Consistency Model (CV)</td>
+        <td>Quant</td>
+        <td>Variance · Coefficient of Variation</td>
+        <td>✓ Core</td>
+        <td>Consistency Alpha · Risk Score</td>
+      </tr>
+      <tr>
+        <td><code>M12</code></td>
+        <td>Random Forest / XGBoost</td>
+        <td>ML</td>
+        <td>scikit-learn · XGBoost · MLflow</td>
+        <td>○ Optional V1.5</td>
+        <td>Risk classification · Pattern detection</td>
+      </tr>
+      <tr>
+        <td><code>M13</code></td>
+        <td>CAPM / Beta Factor</td>
+        <td>Quant</td>
+        <td>OLS regression · Market data</td>
+        <td>○ Optional V1.5</td>
+        <td>Systematic risk score</td>
+      </tr>
+      <tr>
+        <td><code>M14</code></td>
+        <td>NLI Entailment Verifier</td>
+        <td>NLP</td>
+        <td>DeBERTa-v3-NLI · Cross-encoder</td>
+        <td>○ Optional V2.0</td>
+        <td>Hallucination reduction · Audit trail</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout">
+    <div class="callout-label">Document Note</div>
+    <p>This document supersedes all prior model lists for PS2. The in-scope / out-of-scope boundaries defined in §L are final for V1.0. Optional models (M12–M14) should be tracked in the V1.5 backlog and are not blockers for the initial demonstration.</p>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<div class="doc-footer">
+  <div>EREBUS Platform · Model Stack Reference v2.0 · Final · Internal Document</div>
+  <div><span class="classification-badge">Restricted — Do Not Distribute</span></div>
+  <div>© [FIRM NAME REDACTED] · All Rights Reserved</div>
+</div>
+
+</body>
+</html>

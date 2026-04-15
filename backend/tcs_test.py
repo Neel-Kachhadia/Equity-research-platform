@@ -1,0 +1,1 @@
+﻿import urllib.request\ntry:\n  resp = urllib.request.urlopen('http://127.0.0.1:8000/analyze?company_id=TCS&mode=normal')\n  with open('tcs_test.json', 'w', encoding='utf-8') as f:\n      f.write(resp.read().decode('utf-8'))\n  print('SUCCESS')\nexcept Exception as e:\n  import traceback\n  traceback.print_exc()

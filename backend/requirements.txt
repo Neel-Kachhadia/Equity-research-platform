@@ -1,0 +1,46 @@
+# ── Web framework ────────────────────────────────────────────────────────────
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-dotenv>=1.0.0
+python-multipart>=0.0.9   # FastAPI file / form uploads
+pydantic[email]>=2.0.0       # EmailStr support
+
+# ── Auth ──────────────────────────────────────────────────────────────────────
+PyJWT>=2.8.0                  # JWT encode / decode
+bcrypt>=4.1.0                 # Password hashing
+
+# ── Database ──────────────────────────────────────────────────────────────────
+psycopg2-binary>=2.9.9    # PostgreSQL driver (binary wheel, no libpq needed)
+redis>=5.0.0              # Redis client (RAG cache + session store)
+
+# ── LLM providers ────────────────────────────────────────────────────────────
+google-genai>=1.0.0       # Gemini (google-genai v1.x SDK)
+openai>=1.0.0
+anthropic>=0.20.0
+requests>=2.31.0          # Ollama HTTP client + test assertions
+
+# ── AWS ───────────────────────────────────────────────────────────────────────
+boto3==1.34.69
+botocore==1.34.69
+
+# ── OCR — Tesseract (local, free) ─────────────────────────────────────────────────
+pytesseract>=0.3.13    # Python wrapper for Tesseract-OCR engine
+pdf2image>=1.17.0     # PDF → PIL images (requires: brew install poppler)
+Pillow>=10.0.0        # PIL image handling
+
+# ── Quant / numerical ────────────────────────────────────────────────────────
+numpy
+yfinance>=0.2.40          # Yahoo Finance data (ingestion module)
+
+# ── RAG pipeline ─────────────────────────────────────────────────────────────
+pypdf
+openpyxl>=3.1.0           # Required for Screener.in Excel (.xlsx) parsing
+beautifulsoup4>=4.12.0    # HTML parsing (pdf_scraper, web scraping)
+lxml>=5.0.0               # Fast parser backend for BeautifulSoup
+# faiss-cpu — install separately after everything else: pip install faiss-cpu
+
+# ── Testing ───────────────────────────────────────────────────────────────────
+pytest>=8.0.0
+httpx>=0.27.0             # Finnhub news fetcher + FastAPI TestClient
+pytest-asyncio>=0.23.0   # Async test support
+feedparser>=6.0.0         # RSS feed parsing for financial news
